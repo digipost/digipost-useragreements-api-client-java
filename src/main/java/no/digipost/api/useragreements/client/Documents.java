@@ -18,32 +18,21 @@ package no.digipost.api.useragreements.client;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Agreement {
+public class Documents {
 
-	@XmlElement(required = true)
-	private String type;
-	@XmlElement(name = "user-id", required = true)
-	private String userId;
-	//private String sessionId;
-	//TODO: Include BankId session identifier?
-	@XmlElement
-	private Map<String, String> attributes;
+	@XmlElement(name = "document")
+	private List<Document> documents;
 
-	public Agreement() {}
+	public Documents() {}
 
-	public Agreement(final AgreementType type, final UserId userId, final Map<String, String> attributes) {
-		this.type = type.getType();
-		this.userId = userId.getFnr();
-		this.attributes = attributes;
+	public Documents(final List<Document> documents) {
+		this.documents = documents;
 	}
 
-	public static Agreement createInvoiceBankAgreement(final UserId userId, final boolean smsNotification) {
-		Map<String, String> attribs = new HashMap<>();
-		attribs.put("sms-notification", String.valueOf(smsNotification));
-		return new Agreement(AgreementType.INVOICE_BANK, userId, attribs);
+	public List<Document> getDocuments() {
+		return documents;
 	}
 }

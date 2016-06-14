@@ -15,9 +15,16 @@
  */
 package no.digipost.api.useragreements.client;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Document {
 
+	@XmlElement
 	private final long id;
+	@XmlElement
 	private final Invoice invoice;
 
 	public Document(final long id, final Invoice invoice) {

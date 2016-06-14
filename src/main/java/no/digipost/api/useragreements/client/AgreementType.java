@@ -15,20 +15,34 @@
  */
 package no.digipost.api.useragreements.client;
 
-/**
- * User id represented by fødselsnummer
- */
-public class UserId {
+import java.util.Objects;
 
-	public static final String QUERY_PARAM_NAME = "user-id";
+public class AgreementType {
 
-	private final String fnr;
+	public static final AgreementType INVOICE_BANK = new AgreementType("invoice-bank");
 
-	public UserId(final String fnr) {
-		this.fnr = fnr;
+	public static final String QUERY_PARAM_NAME = "agreement-type";
+
+	private final String type;
+
+	public AgreementType(final String type) {
+		this.type = type;
 	}
 
-	public String getFnr() {
-		return fnr;
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		final AgreementType that = (AgreementType) o;
+		return Objects.equals(type, that.type);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(type);
+	}
+
+	public String getType() {
+		return type;
 	}
 }
