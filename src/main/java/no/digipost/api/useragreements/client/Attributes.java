@@ -13,5 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://api.digipost.no/schema/v7", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package no.digipost.api.useragreements.client;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import java.util.ArrayList;
+import java.util.List;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Attributes {
+	@XmlElement(name = "attribute")
+	public List<Attribute> attributes;
+
+	public Attributes() {}
+
+	public Attributes(final ArrayList<Attribute> attributes) {
+		this.attributes = attributes;
+	}
+
+	public List<Attribute> getAttributes() {
+		return attributes;
+	}
+}
