@@ -16,6 +16,8 @@
 package no.digipost.api.useragreements.client;
 
 import no.digipost.api.useragreements.client.ApiCommons;
+import no.digipost.api.useragreements.client.errorhandling.DigipostClientException;
+import no.digipost.api.useragreements.client.errorhandling.ErrorCode;
 import no.digipost.api.useragreements.client.filters.request.RequestContentSHA256Filter;
 import no.digipost.api.useragreements.client.filters.request.RequestDateInterceptor;
 import no.digipost.api.useragreements.client.filters.request.RequestSignatureInterceptor;
@@ -92,16 +94,20 @@ public class DigipostUserDocumentClient {
 		try (final CloseableHttpResponse response = action.call()) {
 			ApiCommons.checkResponse(response);
 			return JAXB.unmarshal(response.getEntity().getContent(), resultType);
+		} catch (DigipostClientException e) {
+			throw e;
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e);
 		}
 	}
 
 	private void handleVoid(final Callable<CloseableHttpResponse> action) {
 		try (final CloseableHttpResponse response = action.call()) {
 			ApiCommons.checkResponse(response);
+		} catch (DigipostClientException e) {
+			throw e;
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
+			throw new DigipostClientException(ErrorCode.CLIENT_ERROR, e);
 		}
 	}
 
