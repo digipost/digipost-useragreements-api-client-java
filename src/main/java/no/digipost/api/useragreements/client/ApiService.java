@@ -18,7 +18,6 @@ package no.digipost.api.useragreements.client;
 import no.digipost.api.useragreements.client.errorhandling.DigipostClientException;
 import no.digipost.api.useragreements.client.representations.EntryPoint;
 import no.digipost.api.useragreements.client.representations.ErrorMessage;
-import no.digipost.api.useragreements.client.representations.Identification;
 import no.digipost.api.useragreements.client.representations.PersonalIdentificationNumber;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.output.ByteArrayOutputStream;

@@ -25,7 +25,6 @@ import no.digipost.api.useragreements.client.filters.request.RequestUserAgentInt
 import no.digipost.api.useragreements.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.useragreements.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.useragreements.client.representations.IdentificationResult;
 import no.digipost.api.useragreements.client.security.Pkcs12KeySigner;
 import no.digipost.api.useragreements.client.util.Supplier;
 import no.digipost.http.client.DigipostHttpClientFactory;
@@ -35,7 +34,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.SSLContextBuilder;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
