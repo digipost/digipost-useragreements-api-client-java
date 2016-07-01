@@ -15,8 +15,6 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.representations.IdentificationResult;
-import no.digipost.api.useragreements.client.representations.IdentificationResultCode;
 import org.apache.http.HttpHost;
 
 import java.io.InputStream;
