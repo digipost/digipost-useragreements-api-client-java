@@ -15,24 +15,16 @@
  */
 package no.digipost.api.useragreements.client;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-@XmlType(name = "status")
-@XmlEnum
-public enum InvoiceStatus {
+public class InvoiceStatusXmlAdapter extends XmlAdapter<String,InvoiceStatus> {
+    @Override
+    public InvoiceStatus unmarshal(String v) {
+        return InvoiceStatus.valueOf(v.toUpperCase());
+    }
 
-	UNPAID("unpaid"),
-	PAID("paid"),
-	DELETED("deleted");
-
-	private final String status;
-
-	InvoiceStatus(final String status) {
-		this.status = status;
-	}
-
-	public String getStatus() {
-		return status;
-	}
+    @Override
+    public String marshal(InvoiceStatus v) {
+        return v.name().toLowerCase();
+    }
 }

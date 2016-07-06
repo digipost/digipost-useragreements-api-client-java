@@ -15,31 +15,16 @@
  */
 package no.digipost.api.useragreements.client;
 
-import java.util.Objects;
+public enum AgreementType {
 
-public class AgreementType {
-
-	public static final AgreementType INVOICE_BANK = new AgreementType("invoice-bank");
+	INVOICE_BANK("invoice-bank");
 
 	public static final String QUERY_PARAM_NAME = "agreement-type";
 
 	private final String type;
 
-	public AgreementType(final String type) {
+	AgreementType(final String type) {
 		this.type = type;
-	}
-
-	@Override
-	public boolean equals(final Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		final AgreementType that = (AgreementType) o;
-		return Objects.equals(type, that.type);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(type);
 	}
 
 	public String getType() {

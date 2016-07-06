@@ -15,24 +15,20 @@
  */
 package no.digipost.api.useragreements.client;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-@XmlType(name = "status")
-@XmlEnum
-public enum InvoiceStatus {
+public class AgreementTypeXmlAdapter extends XmlAdapter<String,AgreementType> {
+    @Override
+    public AgreementType unmarshal(String v) {
+        for (AgreementType t : AgreementType.values()) {
+            if ( t.getType().compareTo(v) == 0 )
+                return t;
+        }
+        throw new IllegalArgumentException("Value " + v + " is illegal for " + AgreementType.class);
+    }
 
-	UNPAID("unpaid"),
-	PAID("paid"),
-	DELETED("deleted");
-
-	private final String status;
-
-	InvoiceStatus(final String status) {
-		this.status = status;
-	}
-
-	public String getStatus() {
-		return status;
-	}
+    @Override
+    public String marshal(AgreementType v) {
+        return v.getType();
+    }
 }
