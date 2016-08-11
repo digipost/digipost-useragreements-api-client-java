@@ -18,7 +18,7 @@ package no.digipost.api.useragreements.client;
 public class Kid extends JustAValid<String> {
 
     protected Kid(String value) {
-        super(value, "Kid", "Kid can not be null");
+        super(value, "Kid can not be null");
     }
 
     public static Kid of(String kid) {
