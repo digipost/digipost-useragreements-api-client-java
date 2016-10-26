@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.representations.xml;
+package no.digipost.api.useragreements.client.xml;
 
-import javax.xml.bind.DatatypeConverter;
+import no.digipost.api.useragreements.client.InvoiceStatus;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.joda.time.LocalDate;
+public class InvoiceStatusXmlAdapter extends XmlAdapter<String, InvoiceStatus> {
+    @Override
+    public InvoiceStatus unmarshal(String v) {
+        return InvoiceStatus.valueOf(v.toUpperCase());
+    }
 
-public class DateXmlAdapter extends XmlAdapter<String, LocalDate> {
-
-	@Override
-	public LocalDate unmarshal(final String value) {
-		return new LocalDate(DatatypeConverter.parseDate(value));
-	}
-
-	@Override
-	public String marshal(final LocalDate date) {
-		return date.toString();
-	}
+    @Override
+    public String marshal(InvoiceStatus v) {
+        return v.name().toLowerCase();
+    }
 }

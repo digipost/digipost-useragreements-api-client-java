@@ -16,20 +16,28 @@
 package no.digipost.api.useragreements.client;
 
 
-import no.digipost.api.useragreements.client.representations.ErrorMessage;
+import no.digipost.api.useragreements.client.xml.ErrorCodeXmlAdapter;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "error")
 public class Error {
 
+	@XmlElement(name = "error-code", required = true)
+	@XmlJavaTypeAdapter(ErrorCodeXmlAdapter.class)
 	private final ErrorCode code;
+
+	@XmlElement(name = "error-message", required = true)
 	private final String message;
 
 	private Error(final ErrorCode code, final String message) {
 		this.code = code;
 		this.message = message;
-	}
-
-	public static Error fromErrorMessage(final ErrorMessage errorMessage) {
-		return new Error(ErrorCode.parse(errorMessage.getErrorCode()), errorMessage.getErrorMessage());
 	}
 
 	@Override

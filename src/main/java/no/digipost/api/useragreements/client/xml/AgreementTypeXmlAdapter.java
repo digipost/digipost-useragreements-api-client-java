@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client;
+package no.digipost.api.useragreements.client.xml;
+
+import no.digipost.api.useragreements.client.AgreementType;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 

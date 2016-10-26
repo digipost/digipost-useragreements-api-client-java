@@ -13,8 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client;
+package no.digipost.api.useragreements.client.xml;
 
-public interface EventLogger {
-	void log(String logMessage);
+import no.digipost.api.useragreements.client.ErrorCode;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+public class ErrorCodeXmlAdapter extends XmlAdapter<String, ErrorCode> {
+    @Override
+    public ErrorCode unmarshal(String v) {
+        return ErrorCode.valueOf(v);
+    }
+
+    @Override
+    public String marshal(ErrorCode v) {
+        return v.name();
+    }
 }

@@ -13,17 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client;
+package no.digipost.api.useragreements.client.xml;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import no.digipost.api.useragreements.client.Kid;
 
-public abstract class JustAValidXmlAdapter<T extends JustAValid<String>> extends XmlAdapter<String,T> {
-
-        @Override
-        public abstract T unmarshal(final String value);
-
-        @Override
-        public String marshal(final T item) {
-                return item.serialize();
-        }
+public class KidXmlAdapter extends JustAValidXmlAdapter<Kid> {
+    @Override
+    public Kid unmarshal(String value) {
+        return new Kid(value);
+    }
 }

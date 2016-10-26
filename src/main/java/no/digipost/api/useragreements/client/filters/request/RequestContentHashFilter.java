@@ -15,35 +15,23 @@
  */
 package no.digipost.api.useragreements.client.filters.request;
 
-import no.digipost.api.useragreements.client.EventLogger;
+import no.digipost.api.useragreements.client.ErrorCode;
+import no.digipost.api.useragreements.client.UserDocumentsApiException;
 import org.apache.http.HttpRequest;
 import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static no.digipost.api.useragreements.client.util.MigrationUtil.NOOP_EVENT_LOGGER;
-
 public abstract class RequestContentHashFilter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(RequestContentHashFilter.class);
-	private final EventLogger eventLogger;
+	private final Logger log = LoggerFactory.getLogger(getClass());
 	private final Class<? extends ExtendedDigest> digestClass;
 	private final String header;
 
-	public RequestContentHashFilter(final EventLogger eventListener, final Class<? extends ExtendedDigest> digestClass, final String header) {
-		eventLogger = eventListener != null ? eventListener : NOOP_EVENT_LOGGER;
+	public RequestContentHashFilter(final Class<? extends ExtendedDigest> digestClass, final String header) {
 		this.digestClass = digestClass;
 		this.header = header;
-	}
-
-	public RequestContentHashFilter(final Class<? extends ExtendedDigest> digestClass, final String header) {
-		this(NOOP_EVENT_LOGGER, digestClass, header);
-	}
-
-	private void log(final String stringToSignMsg) {
-		LOG.debug(stringToSignMsg);
-		eventLogger.log(stringToSignMsg);
 	}
 
 	public void settContentHashHeader(final byte[] data, final HttpRequest httpRequest) {
@@ -54,9 +42,9 @@ public abstract class RequestContentHashFilter {
 			instance.doFinal(result, 0);
 			String hash = new String(Base64.encode(result));
 			httpRequest.setHeader(header, hash);
-			log(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
+			log.debug(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
 		} catch (InstantiationException | IllegalAccessException e) {
-			log("Feil ved generering av " + header + " : " + e.getMessage());
+			throw new UserDocumentsApiException(ErrorCode.CLIENT_TECHNICAL_ERROR, "Feil ved generering av " + header, e);
 		}
 	}
 }

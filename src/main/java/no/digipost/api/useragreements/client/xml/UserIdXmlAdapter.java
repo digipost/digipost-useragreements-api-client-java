@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.representations;
+package no.digipost.api.useragreements.client.xml;
 
-public class MediaTypes {
+import no.digipost.api.useragreements.client.UserId;
 
-	public static final String DIGIPOST_MEDIA_TYPE_V6 = "application/vnd.digipost-v6+xml";
-	public static final String DIGIPOST_MEDIA_TYPE_USERS_V1 = "application/vnd.digipost.user-v1+xml";
-
+public class UserIdXmlAdapter extends JustAValidXmlAdapter<UserId> {
+    @Override
+    public UserId unmarshal(String value) {
+        return new UserId(value);
+    }
 }

@@ -20,7 +20,7 @@ import java.util.Properties;
 
 public class UserAgent {
 
-	private static final String DIGIPOST_USER_AGENT_FALLBACK = "Digipost API Client";
+	private static final String DIGIPOST_USER_AGENT_FALLBACK = "Digipost User Agreements API Client";
 
 	public static final String DIGIPOST_USER_AGENT;
 

@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.representations;
+package no.digipost.api.useragreements.client.xml;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.net.URI;
 
-@XmlType(name = "error-type")
-@XmlEnum
-public enum ErrorType {
+public class URIXmlAdapter extends XmlAdapter<String, URI> {
+    @Override
+    public URI unmarshal(final String v) throws Exception {
+        if (v != null) {
+            return new URI(v);
+        } else {
+            return null;
+        }
+    }
 
-	SERVER,
-	CLIENT_DATA,
-	CLIENT_TECHNICAL,
-	CONFIGURATION,
-	NONE;
-
-	public String value() {
-		return name();
-	}
-
-	public static ErrorType fromValue(final String v) {
-		return valueOf(v);
-	}
-
-
+    @Override
+    public String marshal(final URI v) throws Exception {
+        if (v != null) {
+            return v.toString();
+        } else {
+            return null;
+        }
+    }
 }

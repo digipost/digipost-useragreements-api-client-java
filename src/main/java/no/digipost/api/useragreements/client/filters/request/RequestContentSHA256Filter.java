@@ -15,15 +15,10 @@
  */
 package no.digipost.api.useragreements.client.filters.request;
 
-import no.digipost.api.useragreements.client.EventLogger;
 import no.digipost.api.useragreements.client.Headers;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
 public class RequestContentSHA256Filter extends RequestContentHashFilter {
-	public RequestContentSHA256Filter(final EventLogger eventListener) {
-		super(eventListener, SHA256Digest.class, Headers.X_Content_SHA256);
-	}
-
 	public RequestContentSHA256Filter() {
 		super(SHA256Digest.class, Headers.X_Content_SHA256);
 	}

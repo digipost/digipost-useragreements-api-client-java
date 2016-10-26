@@ -15,6 +15,10 @@
  */
 package no.digipost.api.useragreements.client;
 
+import no.digipost.api.useragreements.client.xml.AgreementTypeXmlAdapter;
+import no.digipost.api.useragreements.client.xml.AttributesMapAdapter;
+import no.digipost.api.useragreements.client.xml.URIXmlAdapter;
+
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.net.URI;
@@ -34,12 +38,9 @@ public class Agreement {
 
 	@XmlElement(name = "user-id", required = true)
 	private String userId;
-	//TODO: Include BankId session identifier?
-	//private String sessionId;
 
 	@XmlElement
 	@XmlJavaTypeAdapter(AttributesMapAdapter.class)
-	// TODO: switch to EnumMap?
 	private HashMap<String, String> attributes;
 
 	public Agreement() {}
