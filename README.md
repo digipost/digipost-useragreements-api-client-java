@@ -1,6 +1,8 @@
+[![Build Status](https://travis-ci.org/digipost/digipost-useragreements-api-client-java.svg?branch=master)](https://travis-ci.org/digipost/digipost-useragreements-api-client-java)
+
 # Java client library for Digipost User Agreement API
 
-Online documentation: TBA
+Online documentation: https://github.com/digipost/invoice-api-specification
 
 ## Java Cryptographic Extension
 
