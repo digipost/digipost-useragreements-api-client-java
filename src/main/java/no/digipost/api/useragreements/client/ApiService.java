@@ -278,9 +278,9 @@ public class ApiService {
 			@Override
 			public EntryPoint handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
 				if (response.getStatusLine().getStatusCode() == SC_OK) {
-					return JAXB.unmarshal(response.getEntity().getContent(), EntryPoint.class);
+					return DigipostUserAgreementsClient.unmarshallEntity(response, EntryPoint.class);
 				} else {
-					Error error = JAXB.unmarshal(response.getEntity().getContent(), Error.class);
+					Error error = DigipostUserAgreementsClient.readErrorFromResponse(response);
 					throw new UnexpectedResponseException(response.getStatusLine(), error);
 				}
 			}

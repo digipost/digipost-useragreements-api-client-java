@@ -40,6 +40,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.xml.bind.DataBindingException;
 import javax.xml.bind.JAXB;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -47,6 +48,8 @@ import java.net.URISyntaxException;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * API client for managing Digipost documents on behalf of users
@@ -264,7 +267,7 @@ public class DigipostUserAgreementsClient {
 			public T handleResponse(final HttpResponse response) throws IOException {
 				final StatusLine statusLine = response.getStatusLine();
 				if (isOkResponse(statusLine.getStatusCode())) {
-					return JAXB.unmarshal(response.getEntity().getContent(), responseType);
+					return unmarshallEntity(response, responseType);
 				} else {
 					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
 				}
@@ -279,15 +282,14 @@ public class DigipostUserAgreementsClient {
 	public static <T> T unmarshallEntity(final HttpResponse response, final Class<T> returnType) {
 		final StatusLine statusLine = response.getStatusLine();
 		try {
-			final String body = EntityUtils.toString(response.getEntity());
-			if (body.length() == 0) {
+			final byte[] body = EntityUtils.toByteArray(response.getEntity());
+			if (body.length == 0) {
 				throw new UnexpectedResponseException(statusLine, ErrorCode.NO_ENTITY, "Message body is empty");
 			}
 			try {
-				T result = JAXB.unmarshal(response.getEntity().getContent(), returnType);
-				return result;
+				return JAXB.unmarshal(new ByteArrayInputStream(body), returnType);
 			} catch (IllegalStateException | DataBindingException e) {
-				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, body, e);
+				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, new String(body, UTF_8), e);
 			}
 		} catch (IOException e) {
 			throw new UnexpectedResponseException(statusLine, ErrorCode.IO_EXCEPTION, e.getMessage(), e);

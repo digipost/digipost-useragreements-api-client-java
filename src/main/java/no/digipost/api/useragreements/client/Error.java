@@ -30,15 +30,17 @@ public class Error {
 
 	@XmlElement(name = "error-code", required = true)
 	@XmlJavaTypeAdapter(ErrorCodeXmlAdapter.class)
-	private final ErrorCode code;
+	private ErrorCode code;
 
 	@XmlElement(name = "error-message", required = true)
-	private final String message;
+	private String message;
 
-	private Error(final ErrorCode code, final String message) {
+	public Error(final ErrorCode code, final String message) {
 		this.code = code;
 		this.message = message;
 	}
+
+	private Error() {}
 
 	@Override
 	public String toString() {
