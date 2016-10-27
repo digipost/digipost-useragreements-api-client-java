@@ -15,7 +15,9 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.representations.xml.DateXmlAdapter;
+import no.digipost.api.useragreements.client.xml.DateXmlAdapter;
+import no.digipost.api.useragreements.client.xml.InvoiceStatusXmlAdapter;
+import no.digipost.api.useragreements.client.xml.KidXmlAdapter;
 import org.joda.time.LocalDate;
 
 import javax.xml.bind.annotation.*;

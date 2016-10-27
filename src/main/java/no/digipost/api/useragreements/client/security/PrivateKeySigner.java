@@ -13,17 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client;
+package no.digipost.api.useragreements.client.security;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.io.InputStream;
+import java.security.PrivateKey;
 
-public abstract class JustAValidXmlAdapter<T extends JustAValid<String>> extends XmlAdapter<String,T> {
 
-        @Override
-        public abstract T unmarshal(final String value);
+public class PrivateKeySigner implements Signer {
 
-        @Override
-        public String marshal(final T item) {
-                return item.serialize();
-        }
+	private final PrivateKey privateKey;
+
+	public PrivateKeySigner(final InputStream certificate, final String password) {
+		privateKey = CryptoUtil.loadKeyFromP12(certificate, password);
+	}
+
+	public PrivateKeySigner(final PrivateKey privateKey) {
+		this.privateKey = privateKey;
+	}
+
+	@Override
+	public byte[] sign(final String dataToSign) {
+		return CryptoUtil.sign(privateKey, dataToSign);
+	}
+
 }

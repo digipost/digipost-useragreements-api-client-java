@@ -22,9 +22,8 @@ import no.digipost.api.useragreements.client.filters.request.RequestUserAgentInt
 import no.digipost.api.useragreements.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.useragreements.client.filters.response.ResponseSignatureInterceptor;
-import no.digipost.api.useragreements.client.representations.ErrorMessage;
 import no.digipost.api.useragreements.client.security.CryptoUtil;
-import no.digipost.api.useragreements.client.security.Pkcs12KeySigner;
+import no.digipost.api.useragreements.client.security.PrivateKeySigner;
 import no.digipost.api.useragreements.client.util.Supplier;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
@@ -41,6 +40,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.xml.bind.DataBindingException;
 import javax.xml.bind.JAXB;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -49,16 +49,16 @@ import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
 
-import static no.digipost.api.useragreements.client.util.MigrationUtil.NOOP_EVENT_LOGGER;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * API client for managing Digipost documents on behalf of users
  */
-public class DigipostUserDocumentClient {
+public class DigipostUserAgreementsClient {
 
 	private final ApiService apiService;
 
-	public DigipostUserDocumentClient(final ApiService apiService) {
+	public DigipostUserAgreementsClient(final ApiService apiService) {
 		this.apiService = apiService;
 		CryptoUtil.verifyTLSCiphersAvailable();
 	}
@@ -267,7 +267,7 @@ public class DigipostUserDocumentClient {
 			public T handleResponse(final HttpResponse response) throws IOException {
 				final StatusLine statusLine = response.getStatusLine();
 				if (isOkResponse(statusLine.getStatusCode())) {
-					return JAXB.unmarshal(response.getEntity().getContent(), responseType);
+					return unmarshallEntity(response, responseType);
 				} else {
 					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
 				}
@@ -282,15 +282,14 @@ public class DigipostUserDocumentClient {
 	public static <T> T unmarshallEntity(final HttpResponse response, final Class<T> returnType) {
 		final StatusLine statusLine = response.getStatusLine();
 		try {
-			final String body = EntityUtils.toString(response.getEntity());
-			if (body.length() == 0) {
+			final byte[] body = EntityUtils.toByteArray(response.getEntity());
+			if (body.length == 0) {
 				throw new UnexpectedResponseException(statusLine, ErrorCode.NO_ENTITY, "Message body is empty");
 			}
 			try {
-				T result = JAXB.unmarshal(response.getEntity().getContent(), returnType);
-				return result;
+				return JAXB.unmarshal(new ByteArrayInputStream(body), returnType);
 			} catch (IllegalStateException | DataBindingException e) {
-				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, body, e);
+				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, new String(body, UTF_8), e);
 			}
 		} catch (IOException e) {
 			throw new UnexpectedResponseException(statusLine, ErrorCode.IO_EXCEPTION, e.getMessage(), e);
@@ -298,8 +297,7 @@ public class DigipostUserDocumentClient {
 	}
 
 	public static Error readErrorFromResponse(final HttpResponse response) {
-		final ErrorMessage errorMessage = unmarshallEntity(response, ErrorMessage.class);
-		return Error.fromErrorMessage(errorMessage);
+		return unmarshallEntity(response, Error.class);
 	}
 
 	public static class Builder {
@@ -370,24 +368,24 @@ public class DigipostUserDocumentClient {
 			return this;
 		}
 
-		public DigipostUserDocumentClient build() {
+		public DigipostUserAgreementsClient build() {
 			final ApiServiceProvider apiServiceProvider = new ApiServiceProvider();
-			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(NOOP_EVENT_LOGGER, new Supplier<byte[]>() {
+			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
 				@Override
 				public byte[] get() {
 					return apiServiceProvider.getApiService().getEntryPoint().getCertificate().getBytes();
 				}
-			}, ServerSignatureException.getExceptionSupplier());
+			});
 
-			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor(null));
+			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor());
 			httpClientBuilder.addInterceptorLast(new RequestUserAgentInterceptor());
 			if (privateKey == null) {
-				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(certificateP12File, certificatePassword), null, new RequestContentSHA256Filter(null)));
+				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new PrivateKeySigner(certificateP12File, certificatePassword), new RequestContentSHA256Filter()));
 			} else {
-				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(privateKey), null, new RequestContentSHA256Filter(null)));
+				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new PrivateKeySigner(privateKey), new RequestContentSHA256Filter()));
 			}
-			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor(ServerSignatureException.getExceptionSupplier()));
-			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor(ServerSignatureException.getExceptionSupplier()));
+			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor());
+			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
 			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);
 
 			if (proxyHost != null) {
@@ -396,7 +394,7 @@ public class DigipostUserDocumentClient {
 
 			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());
 			apiServiceProvider.setApiService(apiService);
-			return new DigipostUserDocumentClient(apiService);
+			return new DigipostUserAgreementsClient(apiService);
 		}
 	}
 }

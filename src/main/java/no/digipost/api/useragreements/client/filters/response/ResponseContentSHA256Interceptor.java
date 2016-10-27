@@ -15,8 +15,7 @@
  */
 package no.digipost.api.useragreements.client.filters.response;
 
-import no.digipost.api.useragreements.client.errorhandling.DigipostClientException;
-import no.digipost.api.useragreements.client.util.ResponseExceptionSupplier;
+import no.digipost.api.useragreements.client.ServerSignatureException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -32,20 +31,9 @@ import org.bouncycastle.util.encoders.Base64;
 import java.io.IOException;
 
 import static no.digipost.api.useragreements.client.Headers.X_Content_SHA256;
-import static no.digipost.api.useragreements.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor {
-
-	private final ResponseExceptionSupplier<?> exceptionSupplier;
-
-	public ResponseContentSHA256Interceptor() {
-		this(DigipostClientException.getExceptionSupplier(SERVER_SIGNATURE_ERROR));
-	}
-
-	public ResponseContentSHA256Interceptor(final ResponseExceptionSupplier<?> exceptionSupplier) {
-		this.exceptionSupplier = exceptionSupplier;
-	}
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) {
@@ -61,14 +49,14 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 				if (entityBytes.length > 0) {
 					String hashHeader = findHeader(response, X_Content_SHA256);
 					if (isBlank(hashHeader)) {
-						throw exceptionSupplier.get(response.getStatusLine(), "Mangler X-Content-SHA256-header - server-signatur kunne ikke valideres");
+						throw new ServerSignatureException(response.getStatusLine(), "Mangler X-Content-SHA256-header - server-signatur kunne ikke valideres");
 					}
 					validerBytesMotHashHeader(hashHeader, entityBytes, response);
 				}
 				response.setEntity(new ByteArrayEntity(entityBytes));
 			}
 		} catch (IOException e) {
-			throw exceptionSupplier.get(response.getStatusLine(), "Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header - server-signatur kunne ikke valideres: " + e.getMessage());
+			throw new ServerSignatureException(response.getStatusLine(), "Det skjedde en feil under uthenting av innhold for validering av X-Content-SHA256-header - server-signatur kunne ikke valideres: " + e.getMessage());
 		}
 	}
 
@@ -91,7 +79,7 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 		digest.doFinal(result, 0);
 		String ourHash = new String(Base64.encode(result));
 		if (!serverHash.equals(ourHash)) {
-			throw exceptionSupplier.get(response.getStatusLine(), "X-Content-SHA256-header matchet ikke innholdet - server-signatur er feil.");
+			throw new ServerSignatureException(response.getStatusLine(), "X-Content-SHA256-header matchet ikke innholdet - server-signatur er feil.");
 		}
 	}
 }

@@ -15,47 +15,37 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.xml.URIXmlAdapter;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.net.URI;
+import java.util.List;
 
-@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class DocumentContent {
+@XmlRootElement(name = "entrypoint")
+public class EntryPoint {
 
-	@XmlElement(name = "content-type")
-	private String contentType;
+	@XmlElement(name = "certificate", required = false)
+	private String certificate;
 
-	@XmlElement(name = "uri")
-	@XmlJavaTypeAdapter(URIXmlAdapter.class)
-	private URI uri;
+	@XmlElement(name = "link")
+	protected List<Link> link;
 
-	private DocumentContent() {}
-
-	public DocumentContent(final String contentType, final URI uri) {
-		this.contentType = contentType;
-		this.uri = uri;
+	protected Link getLinkByRelationName(final String relation) {
+		for (Link l : link) {
+			if (l.equalsRelation(relation)) {
+				return l;
+			}
+		}
+		return null;
 	}
 
-	public String getContentType() {
-		return contentType;
+	public String getCertificate() {
+		return certificate;
 	}
 
-	public URI getTempUri() {
-		return uri;
-	}
-
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("DocumentContent{");
-		sb.append("contentType='").append(contentType).append('\'');
-		sb.append(", uri=").append(uri);
-		sb.append('}');
-		return sb.toString();
+	public URI getIdentificationUri() {
+		return getLinkByRelationName("identify_recipient").getUri();
 	}
 }

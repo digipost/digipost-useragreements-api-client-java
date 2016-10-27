@@ -15,8 +15,6 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.representations.EntryPoint;
-import no.digipost.api.useragreements.client.representations.ErrorMessage;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
@@ -40,8 +38,6 @@ import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
 import static no.digipost.api.useragreements.client.Headers.X_Digipost_UserId;
-import static no.digipost.api.useragreements.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_USERS_V1;
-import static no.digipost.api.useragreements.client.representations.MediaTypes.DIGIPOST_MEDIA_TYPE_V6;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -49,6 +45,7 @@ import static org.joda.time.Duration.standardMinutes;
 
 public class ApiService {
 
+	public static final String DIGIPOST_MEDIA_TYPE_USERS_V1 = "application/vnd.digipost.user-v1+xml";
 	private static final String ROOT = "/";
 	private static final String USER_DOCUMENTS_PATH = "/user-documents";
 	private static final String USER_AGREEMENTS_PATH = "/user-agreements";
@@ -259,8 +256,8 @@ public class ApiService {
 		try {
 			return cachedEntryPoint.get();
 		} catch (RuntimeException e) {
-			if (e.getCause() instanceof UserDocumentsApiException) {
-				throw (UserDocumentsApiException) e.getCause();
+			if (e.getCause() instanceof UserAgreementsApiException) {
+				throw (UserAgreementsApiException) e.getCause();
 			} else {
 				throw e;
 			}
@@ -276,16 +273,15 @@ public class ApiService {
 
 	private EntryPoint performGetEntryPoint() {
 		HttpGet httpGet = new HttpGet(serviceEndpoint.resolve(ROOT));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_V6);
+		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		return executeHttpRequest(httpGet, new ResponseHandler<EntryPoint>() {
 			@Override
 			public EntryPoint handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
 				if (response.getStatusLine().getStatusCode() == SC_OK) {
-					EntryPoint entryPoint = JAXB.unmarshal(response.getEntity().getContent(), EntryPoint.class);
-					return entryPoint;
+					return DigipostUserAgreementsClient.unmarshallEntity(response, EntryPoint.class);
 				} else {
-					ErrorMessage errorMessage = JAXB.unmarshal(response.getEntity().getContent(), ErrorMessage.class);
-					throw new UnexpectedResponseException(response.getStatusLine(), Error.fromErrorMessage(errorMessage));
+					Error error = DigipostUserAgreementsClient.readErrorFromResponse(response);
+					throw new UnexpectedResponseException(response.getStatusLine(), error);
 				}
 			}
 		});

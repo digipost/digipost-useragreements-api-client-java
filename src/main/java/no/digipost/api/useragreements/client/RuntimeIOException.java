@@ -15,7 +15,7 @@
  */
 package no.digipost.api.useragreements.client;
 
-public class RuntimeIOException extends UserDocumentsApiException {
+public class RuntimeIOException extends UserAgreementsApiException {
 
 	public RuntimeIOException(final String message) {
 		super(ErrorCode.IO_EXCEPTION, message);

@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.representations;
+package no.digipost.api.useragreements.client.xml;
 
-public enum Relation {
-	SELF,
-	ADD_CONTENT,
-	SEND,
-	SEARCH,
-	AUTOCOMPLETE,
-	CREATE_MESSAGE,
-	API_DOCUMENTATION,
-	GET_ENCRYPTION_KEY,
-	GET_PRINT_ENCRYPTION_KEY,
-	IDENTIFY_RECIPIENT,
-	IDENTIFY_RECIPIENT_WITH_ENCRYPTION_KEY,
-	DOCUMENT_EVENTS,
-	UNSUPPORTED,
-	GET_DOCUMENT_CONTENT,
-	GET_SENDER_INFORMATION,
-	DUPLICATE_DOCUMENT
+import no.digipost.api.useragreements.client.JustAValid;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+public abstract class JustAValidXmlAdapter<T extends JustAValid<String>> extends XmlAdapter<String,T> {
+
+        @Override
+        public abstract T unmarshal(final String value);
+
+        @Override
+        public String marshal(final T item) {
+                return item.serialize();
+        }
 }

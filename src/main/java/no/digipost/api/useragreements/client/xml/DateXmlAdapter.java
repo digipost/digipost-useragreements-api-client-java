@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.util;
+package no.digipost.api.useragreements.client.xml;
 
-import no.digipost.api.useragreements.client.EventLogger;
+import org.joda.time.LocalDate;
 
-public class MigrationUtil {
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-	public static final EventLogger NOOP_EVENT_LOGGER = new EventLogger() {
-		@Override
-		public void log(final String eventText) {
-			// NOOP
-		}
-	};
+public class DateXmlAdapter extends XmlAdapter<String, LocalDate> {
+
+	@Override
+	public LocalDate unmarshal(final String value) {
+		return new LocalDate(DatatypeConverter.parseDate(value));
+	}
+
+	@Override
+	public String marshal(final LocalDate date) {
+		return date.toString();
+	}
 }

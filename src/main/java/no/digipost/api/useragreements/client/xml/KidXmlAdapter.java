@@ -13,27 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.security;
+package no.digipost.api.useragreements.client.xml;
 
-import java.io.InputStream;
-import java.security.PrivateKey;
+import no.digipost.api.useragreements.client.Kid;
 
-
-public class Pkcs12KeySigner implements Signer {
-
-	private final PrivateKey privateKey;
-
-	public Pkcs12KeySigner(final InputStream certificate, final String password) {
-		privateKey = CryptoUtil.loadKeyFromP12(certificate, password);
-	}
-
-	public Pkcs12KeySigner(final PrivateKey privateKey) {
-		this.privateKey = privateKey;
-	}
-
-	@Override
-	public byte[] sign(final String dataToSign) {
-		return CryptoUtil.sign(privateKey, dataToSign);
-	}
-
+public class KidXmlAdapter extends JustAValidXmlAdapter<Kid> {
+    @Override
+    public Kid unmarshal(String value) {
+        return new Kid(value);
+    }
 }

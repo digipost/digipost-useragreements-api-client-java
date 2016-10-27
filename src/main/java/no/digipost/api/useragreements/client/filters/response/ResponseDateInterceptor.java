@@ -15,16 +15,14 @@
  */
 package no.digipost.api.useragreements.client.filters.response;
 
-import no.digipost.api.useragreements.client.errorhandling.DigipostClientException;
+import no.digipost.api.useragreements.client.ServerSignatureException;
 import no.digipost.api.useragreements.client.util.DateUtils;
-import no.digipost.api.useragreements.client.util.ResponseExceptionSupplier;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.protocol.HttpContext;
 import org.joda.time.DateTime;
 
-import static no.digipost.api.useragreements.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.http.HttpHeaders.DATE;
 import static org.joda.time.DateTime.now;
@@ -32,15 +30,6 @@ import static org.joda.time.DateTime.now;
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
 	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
-	private final ResponseExceptionSupplier<?> responseExceptionSupplier;
-
-	public ResponseDateInterceptor() {
-		this(DigipostClientException.getExceptionSupplier(SERVER_SIGNATURE_ERROR));
-	}
-
-	public ResponseDateInterceptor(final ResponseExceptionSupplier<?> responseExceptionSupplier) {
-		this.responseExceptionSupplier = responseExceptionSupplier;
-	}
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) {
@@ -53,7 +42,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 		if (isNotBlank(dateHeader)) {
 			sjekkDato(dateHeader, response);
 		} else {
-			throw responseExceptionSupplier.get(response.getStatusLine(), "Respons mangler Date-header - server-signatur kunne ikke sjekkes");
+			throw new ServerSignatureException(response.getStatusLine(), "Respons mangler Date-header - server-signatur kunne ikke sjekkes");
 		}
 	}
 
@@ -63,19 +52,19 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 			sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date, response);
 			sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date, response);
 		} catch (IllegalArgumentException e) {
-			throw responseExceptionSupplier.get(response.getStatusLine(), "Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
+			throw new ServerSignatureException(response.getStatusLine(), "Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
 		}
 	}
 
 	private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final DateTime parsedDate, HttpResponse response) {
 		if (parsedDate.isBefore(now().minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
-			throw responseExceptionSupplier.get(response.getStatusLine(), "Date-header fra server er for gammel: " + headerDate);
+			throw new ServerSignatureException(response.getStatusLine(), "Date-header fra server er for gammel: " + headerDate);
 		}
 	}
 
 	private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final DateTime parsedDate, HttpResponse response) {
 		if (parsedDate.isAfter(now().plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
-			throw responseExceptionSupplier.get(response.getStatusLine(), "Date-header fra server er for ny: " + headerDate);
+			throw new ServerSignatureException(response.getStatusLine(), "Date-header fra server er for ny: " + headerDate);
 		}
 	}
 }

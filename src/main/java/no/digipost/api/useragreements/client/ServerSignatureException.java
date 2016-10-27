@@ -15,7 +15,6 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.util.ResponseExceptionSupplier;
 import org.apache.http.StatusLine;
 
 public class ServerSignatureException extends UnexpectedResponseException {
@@ -25,14 +24,5 @@ public class ServerSignatureException extends UnexpectedResponseException {
 
 	public ServerSignatureException(final StatusLine status, final String errorMessage, final Throwable cause) {
 		super(status, ErrorCode.SIGNATURE_ERROR, errorMessage, cause);
-	}
-
-	public static ResponseExceptionSupplier<ServerSignatureException> getExceptionSupplier() {
-		return new ResponseExceptionSupplier<ServerSignatureException>() {
-			@Override
-			public ServerSignatureException get(final StatusLine status, final String message) {
-				return new ServerSignatureException(status, message);
-			}
-		};
 	}
 }

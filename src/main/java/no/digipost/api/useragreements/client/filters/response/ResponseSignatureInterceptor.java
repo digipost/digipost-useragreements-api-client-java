@@ -15,11 +15,9 @@
  */
 package no.digipost.api.useragreements.client.filters.response;
 
-import no.digipost.api.useragreements.client.EventLogger;
-import no.digipost.api.useragreements.client.errorhandling.DigipostClientException;
+import no.digipost.api.useragreements.client.ServerSignatureException;
 import no.digipost.api.useragreements.client.security.ClientResponseToVerify;
 import no.digipost.api.useragreements.client.security.ResponseMessageSignatureUtil;
-import no.digipost.api.useragreements.client.util.ResponseExceptionSupplier;
 import no.digipost.api.useragreements.client.util.Supplier;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -28,6 +26,8 @@ import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.protocol.HttpContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -35,31 +35,23 @@ import java.security.*;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import static no.digipost.api.useragreements.client.util.MigrationUtil.NOOP_EVENT_LOGGER;
 import static no.digipost.api.useragreements.client.Headers.X_Digipost_Signature;
-import static no.digipost.api.useragreements.client.errorhandling.ErrorCode.SERVER_SIGNATURE_ERROR;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 
-	private final EventLogger eventLogger;
+	private final Logger log = LoggerFactory.getLogger(getClass());
+
 	private final Supplier<byte[]> certificateSupplier;
-	private final ResponseExceptionSupplier<?> exceptionSupplier;
 
 	public ResponseSignatureInterceptor(final Supplier<byte[]> certificateSupplier) {
-		this(NOOP_EVENT_LOGGER, certificateSupplier, DigipostClientException.getExceptionSupplier(SERVER_SIGNATURE_ERROR));
-	}
-
-	public ResponseSignatureInterceptor(final EventLogger eventLogger, final Supplier<byte[]> certificateSupplier, final ResponseExceptionSupplier<?> exceptionSupplier) {
-		this.eventLogger = eventLogger;
 		this.certificateSupplier = certificateSupplier;
-		this.exceptionSupplier = exceptionSupplier;
 	}
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) {
 		if ("/".equals(((CookieOrigin)(context.getAttribute("http.cookie-origin"))).getPath())) {
-			eventLogger.log("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
+			log.debug("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
 			return;
 		}
 
@@ -74,13 +66,13 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 			instance.update(signatureString.getBytes());
 			boolean verified = instance.verify(serverSignaturBytes);
 			if (!verified) {
-				throw exceptionSupplier.get(response.getStatusLine(), "Melding fra server matcher ikke signatur.");
+				throw new ServerSignatureException(response.getStatusLine(), "Melding fra server matcher ikke signatur.");
 			} else {
-				eventLogger.log("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + X_Digipost_Signature
+				log.debug("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + X_Digipost_Signature
 						+ " var OK: " + serverSignaturBase64);
 			}
 		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-			throw new DigipostClientException(SERVER_SIGNATURE_ERROR, "Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
+			throw new ServerSignatureException(response.getStatusLine(), "Det skjedde en feil under signatursjekk: " + e.getMessage(), e);
 		}
 	}
 
@@ -92,7 +84,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 		}
 
 		if (isBlank(serverSignaturString)) {
-			throw exceptionSupplier.get(response.getStatusLine(),
+			throw new ServerSignatureException(response.getStatusLine(),
 					"Mangler " + X_Digipost_Signature + "-header - server-signatur kunne ikke sjekkes");
 		}
 		return serverSignaturString;
@@ -105,12 +97,12 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 			CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 			X509Certificate sertifikat = (X509Certificate) cf.generateCertificate(certStream);
 			if (sertifikat == null) {
-				throw exceptionSupplier.get(response.getStatusLine(),
+				throw new ServerSignatureException(response.getStatusLine(),
 						"Kunne ikke laste Digipost's public key - server-signatur kunne ikke sjekkes");
 			}
 			return sertifikat;
 		} catch (GeneralSecurityException e) {
-			throw exceptionSupplier.get(response.getStatusLine(),
+			throw new ServerSignatureException(response.getStatusLine(),
 					"Kunne ikke laste Digiposts public key - server-signatur kunne ikke sjekkes");
 		}
 	}

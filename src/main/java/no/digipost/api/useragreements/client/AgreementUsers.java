@@ -15,6 +15,8 @@
  */
 package no.digipost.api.useragreements.client;
 
+import no.digipost.api.useragreements.client.xml.UserIdXmlAdapter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
