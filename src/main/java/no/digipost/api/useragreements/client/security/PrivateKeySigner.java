@@ -19,15 +19,15 @@ import java.io.InputStream;
 import java.security.PrivateKey;
 
 
-public class Pkcs12KeySigner implements Signer {
+public class PrivateKeySigner implements Signer {
 
 	private final PrivateKey privateKey;
 
-	public Pkcs12KeySigner(final InputStream certificate, final String password) {
+	public PrivateKeySigner(final InputStream certificate, final String password) {
 		privateKey = CryptoUtil.loadKeyFromP12(certificate, password);
 	}
 
-	public Pkcs12KeySigner(final PrivateKey privateKey) {
+	public PrivateKeySigner(final PrivateKey privateKey) {
 		this.privateKey = privateKey;
 	}
 

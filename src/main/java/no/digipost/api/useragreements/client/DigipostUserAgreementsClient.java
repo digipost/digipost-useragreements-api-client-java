@@ -23,7 +23,7 @@ import no.digipost.api.useragreements.client.filters.response.ResponseContentSHA
 import no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.useragreements.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.useragreements.client.security.CryptoUtil;
-import no.digipost.api.useragreements.client.security.Pkcs12KeySigner;
+import no.digipost.api.useragreements.client.security.PrivateKeySigner;
 import no.digipost.api.useragreements.client.util.Supplier;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
@@ -378,9 +378,9 @@ public class DigipostUserAgreementsClient {
 			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor());
 			httpClientBuilder.addInterceptorLast(new RequestUserAgentInterceptor());
 			if (privateKey == null) {
-				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(certificateP12File, certificatePassword), new RequestContentSHA256Filter()));
+				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new PrivateKeySigner(certificateP12File, certificatePassword), new RequestContentSHA256Filter()));
 			} else {
-				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new Pkcs12KeySigner(privateKey), new RequestContentSHA256Filter()));
+				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new PrivateKeySigner(privateKey), new RequestContentSHA256Filter()));
 			}
 			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor());
 			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
