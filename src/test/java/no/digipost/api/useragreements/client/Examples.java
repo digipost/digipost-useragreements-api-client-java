@@ -33,7 +33,7 @@ public class Examples {
 		final BrokerId brokerId = new BrokerId(1234L);
 		final SenderId senderId = new SenderId(1234L);
 
-		DigipostUserDocumentClient client = new DigipostUserDocumentClient.Builder(brokerId, key, "password").useProxy(proxy).build();
+		DigipostUserAgreementsClient client = new DigipostUserAgreementsClient.Builder(brokerId, key, "password").useProxy(proxy).build();
 
 		final UserId userId = new UserId("01017012345");
 
@@ -57,11 +57,11 @@ public class Examples {
 		final BrokerId brokerId = new BrokerId(1005);
 		final SenderId senderId = new SenderId(1005);
 
-		final DigipostUserDocumentClient.Builder builder = new DigipostUserDocumentClient.Builder(brokerId, key, "password")
+		final DigipostUserAgreementsClient.Builder builder = new DigipostUserAgreementsClient.Builder(brokerId, key, "password")
 				.serviceEndpoint(new URI("https://api.test.digipost.no"))
 				.useProxy(new HttpHost("proxy.example.com", 8080))
 				.veryDangerouslyDisableCertificateVerificationWhichIsAbsolutelyUnfitForProductionCode();
-		final DigipostUserDocumentClient client = builder.build();
+		final DigipostUserAgreementsClient client = builder.build();
 
 		final String requestTrackingId = "testing-testing-testing";
 		final UserId userId = new UserId("01017012345");

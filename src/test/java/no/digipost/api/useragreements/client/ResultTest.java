@@ -32,12 +32,12 @@ public class ResultTest {
 		new Result.Failure<>("Failure").getValue();
 	}
 
-	@Test(expected = UserDocumentsApiException.class)
+	@Test(expected = UserAgreementsApiException.class)
 	public void failureShouldThrowCustomeExceptionOnGetValue() {
 		new Result.Failure<>("Failure", new Supplier<RuntimeException>() {
 			@Override
 			public RuntimeException get() {
-				return new UserDocumentsApiException(ErrorCode.GENERAL_ERROR, "Custom exception");
+				return new UserAgreementsApiException(ErrorCode.GENERAL_ERROR, "Custom exception");
 			}
 		}).getValue();
 	}
