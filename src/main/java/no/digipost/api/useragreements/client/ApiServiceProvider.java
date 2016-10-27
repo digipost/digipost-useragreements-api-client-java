@@ -15,7 +15,7 @@
  */
 package no.digipost.api.useragreements.client;
 
-class ApiServiceProvider {
+public class ApiServiceProvider {
 
 	private ApiService apiService;
 

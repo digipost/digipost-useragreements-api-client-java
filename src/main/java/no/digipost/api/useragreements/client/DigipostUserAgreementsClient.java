@@ -51,11 +51,11 @@ import java.util.Objects;
 /**
  * API client for managing Digipost documents on behalf of users
  */
-public class DigipostUserDocumentClient {
+public class DigipostUserAgreementsClient {
 
 	private final ApiService apiService;
 
-	public DigipostUserDocumentClient(final ApiService apiService) {
+	public DigipostUserAgreementsClient(final ApiService apiService) {
 		this.apiService = apiService;
 		CryptoUtil.verifyTLSCiphersAvailable();
 	}
@@ -366,7 +366,7 @@ public class DigipostUserDocumentClient {
 			return this;
 		}
 
-		public DigipostUserDocumentClient build() {
+		public DigipostUserAgreementsClient build() {
 			final ApiServiceProvider apiServiceProvider = new ApiServiceProvider();
 			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
 				@Override
@@ -392,7 +392,7 @@ public class DigipostUserDocumentClient {
 
 			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());
 			apiServiceProvider.setApiService(apiService);
-			return new DigipostUserDocumentClient(apiService);
+			return new DigipostUserAgreementsClient(apiService);
 		}
 	}
 }
