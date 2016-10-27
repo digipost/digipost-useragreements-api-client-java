@@ -256,8 +256,8 @@ public class ApiService {
 		try {
 			return cachedEntryPoint.get();
 		} catch (RuntimeException e) {
-			if (e.getCause() instanceof UserDocumentsApiException) {
-				throw (UserDocumentsApiException) e.getCause();
+			if (e.getCause() instanceof UserAgreementsApiException) {
+				throw (UserAgreementsApiException) e.getCause();
 			} else {
 				throw e;
 			}

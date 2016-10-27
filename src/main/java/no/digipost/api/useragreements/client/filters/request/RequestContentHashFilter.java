@@ -16,7 +16,7 @@
 package no.digipost.api.useragreements.client.filters.request;
 
 import no.digipost.api.useragreements.client.ErrorCode;
-import no.digipost.api.useragreements.client.UserDocumentsApiException;
+import no.digipost.api.useragreements.client.UserAgreementsApiException;
 import org.apache.http.HttpRequest;
 import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.util.encoders.Base64;
@@ -44,7 +44,7 @@ public abstract class RequestContentHashFilter {
 			httpRequest.setHeader(header, hash);
 			log.debug(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
 		} catch (InstantiationException | IllegalAccessException e) {
-			throw new UserDocumentsApiException(ErrorCode.CLIENT_TECHNICAL_ERROR, "Feil ved generering av " + header, e);
+			throw new UserAgreementsApiException(ErrorCode.CLIENT_TECHNICAL_ERROR, "Feil ved generering av " + header, e);
 		}
 	}
 }

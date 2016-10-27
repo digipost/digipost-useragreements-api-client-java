@@ -15,7 +15,7 @@
  */
 package no.digipost.api.useragreements.client.security;
 
-import no.digipost.api.useragreements.client.UserDocumentsApiException;
+import no.digipost.api.useragreements.client.UserAgreementsApiException;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
@@ -91,7 +91,7 @@ public class CryptoUtil {
 				if (cipher.substring(3).compareTo(requiredCipher.substring(3)) == 0) return;
 			}
 		}
-		throw new UserDocumentsApiException(CLIENT_TECHNICAL_ERROR, "Could not load any required TLS-ciphers. The client needs one of these ciphers to connect to the server: " + Arrays.toString(requiredCiphers) + ".\n"
+		throw new UserAgreementsApiException(CLIENT_TECHNICAL_ERROR, "Could not load any required TLS-ciphers. The client needs one of these ciphers to connect to the server: " + Arrays.toString(requiredCiphers) + ".\n"
 				+ "Hint: is the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy installed on the system?");
 	}
 }

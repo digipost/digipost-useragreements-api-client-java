@@ -19,7 +19,7 @@ import org.apache.http.StatusLine;
 
 import static java.lang.String.format;
 
-public class UnexpectedResponseException extends UserDocumentsApiException {
+public class UnexpectedResponseException extends UserAgreementsApiException {
 
 	public UnexpectedResponseException(final StatusLine status, final ErrorCode errorCode, final String errorMessage) {
 		this(status, errorCode, errorMessage, null);

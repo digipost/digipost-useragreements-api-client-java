@@ -15,21 +15,21 @@
  */
 package no.digipost.api.useragreements.client;
 
-public class UserDocumentsApiException extends RuntimeException {
+public class UserAgreementsApiException extends RuntimeException {
 
 	private final ErrorCode errorCode;
 
-	public UserDocumentsApiException(final ErrorCode errorCode, final String message) {
+	public UserAgreementsApiException(final ErrorCode errorCode, final String message) {
 		super(message);
 		this.errorCode = errorCode;
 	}
 
-	public UserDocumentsApiException(final ErrorCode errorCode, final String message, final Throwable cause) {
+	public UserAgreementsApiException(final ErrorCode errorCode, final String message, final Throwable cause) {
 		super(message, cause);
 		this.errorCode = errorCode;
 	}
 
-	public UserDocumentsApiException(final ErrorCode errorCode, final Throwable cause) {
+	public UserAgreementsApiException(final ErrorCode errorCode, final Throwable cause) {
 		super(cause);
 		this.errorCode = errorCode;
 	}
