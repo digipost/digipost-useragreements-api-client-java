@@ -15,7 +15,7 @@
 
 	<artifactId>digipost-useragreements-api-client-java</artifactId>
 
-	<version>0.9-SNAPSHOT</version>
+	<version>0.9</version>
 
 	<name>Digipost User Agreements API Client</name>
 	<description>Java library for interacting with the Digipost UserAgreements API</description>
@@ -478,7 +478,7 @@
 		<connection>scm:git:git@github.com:digipost/digipost-useragreements-api-client-java.git</connection>
 		<developerConnection>scm:git:git@github.com:digipost/digipost-useragreements-api-client-java.git</developerConnection>
 		<url>scm:git:git@github.com:digipost/digipost-useragreements-api-client-java</url>
-		<tag>HEAD</tag>
+		<tag>0.9</tag>
 	</scm>
 
 </project>
