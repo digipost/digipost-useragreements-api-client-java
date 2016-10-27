@@ -252,7 +252,7 @@ public class ApiService {
 		return new ByteArrayEntity(bao.toByteArray());
 	}
 
-	EntryPoint getEntryPoint() {
+	public EntryPoint getEntryPoint() {
 		try {
 			return cachedEntryPoint.get();
 		} catch (RuntimeException e) {
