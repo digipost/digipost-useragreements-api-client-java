@@ -46,10 +46,12 @@ public abstract class JustA<T> {
         return Objects.hashCode(value);
     }
 
-    @Override
-    public String toString() {
-        return getClass() + ": '" + value.toString() + "'";
-    }
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "{" +
+				"value=" + value +
+				'}';
+	}
 
-    public abstract String serialize();
+	public abstract String serialize();
 }
