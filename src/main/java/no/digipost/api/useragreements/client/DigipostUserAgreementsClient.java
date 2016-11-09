@@ -35,6 +35,8 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
@@ -55,6 +57,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * API client for managing Digipost documents on behalf of users
  */
 public class DigipostUserAgreementsClient {
+
+	private static final Logger LOG = LoggerFactory.getLogger(DigipostUserAgreementsClient.class);
 
 	private final ApiService apiService;
 
@@ -285,6 +289,9 @@ public class DigipostUserAgreementsClient {
 			final byte[] body = EntityUtils.toByteArray(response.getEntity());
 			if (body.length == 0) {
 				throw new UnexpectedResponseException(statusLine, ErrorCode.NO_ENTITY, "Message body is empty");
+			}
+			if (LOG.isTraceEnabled()) {
+				LOG.trace(new String(body, UTF_8));
 			}
 			try {
 				return JAXB.unmarshal(new ByteArrayInputStream(body), returnType);
