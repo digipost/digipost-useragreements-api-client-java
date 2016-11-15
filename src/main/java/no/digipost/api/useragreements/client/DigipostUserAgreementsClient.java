@@ -85,6 +85,7 @@ public class DigipostUserAgreementsClient {
 		return apiService.createAgreement(senderId, agreement, requestTrackingId, createdWithLocationHandler());
 	}
 
+	@Deprecated
 	public Agreement getAgreement(final URI agreementUri, final String requestTrackingId) {
 		return apiService.getAgreement(agreementUri, requestTrackingId, simpleJAXBEntityHandler(Agreement.class));
 	}
@@ -131,6 +132,7 @@ public class DigipostUserAgreementsClient {
 		return agreements.getAgreements();
 	}
 
+	@Deprecated
 	public void deleteAgreement(final URI agreementPath, final String requestTrackingId) {
 		apiService.deleteAgrement(agreementPath, requestTrackingId, voidOkHandler());
 	}

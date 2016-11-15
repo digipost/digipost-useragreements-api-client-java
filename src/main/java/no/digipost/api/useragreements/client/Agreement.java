@@ -28,6 +28,7 @@ import java.util.HashMap;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Agreement {
 
+	@Deprecated
 	@XmlAttribute
 	@XmlJavaTypeAdapter(URIXmlAdapter.class)
 	private URI href;
@@ -69,10 +70,12 @@ public class Agreement {
 		return attributes;
 	}
 
+	@Deprecated
 	public URI getHref() {
 		return href;
 	}
 
+	@Deprecated
 	public void setHref(final URI href) {
 		this.href = href;
 	}
