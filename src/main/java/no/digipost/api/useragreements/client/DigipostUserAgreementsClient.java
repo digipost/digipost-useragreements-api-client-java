@@ -27,14 +27,16 @@ import no.digipost.api.useragreements.client.security.PrivateKeySigner;
 import no.digipost.api.useragreements.client.util.Supplier;
 import no.digipost.http.client.DigipostHttpClientFactory;
 import no.digipost.http.client.DigipostHttpClientSettings;
-import org.apache.http.*;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +48,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
@@ -76,18 +77,13 @@ public class DigipostUserAgreementsClient {
 		return apiService.identifyUser(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(IdentificationResult.class));
 	}
 
-	public URI createOrReplaceAgreement(final SenderId senderId, final Agreement agreement) {
-		return createOrReplaceAgreement(senderId, agreement, null); }
+	public void createOrReplaceAgreement(final SenderId senderId, final Agreement agreement) {
+		createOrReplaceAgreement(senderId, agreement, null); }
 
-	public URI createOrReplaceAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId) {
+	public void createOrReplaceAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreement, "agreement cannot be null");
-		return apiService.createAgreement(senderId, agreement, requestTrackingId, createdWithLocationHandler());
-	}
-
-	@Deprecated
-	public Agreement getAgreement(final URI agreementUri, final String requestTrackingId) {
-		return apiService.getAgreement(agreementUri, requestTrackingId, simpleJAXBEntityHandler(Agreement.class));
+		apiService.createAgreement(senderId, agreement, requestTrackingId, voidOkHandler());
 	}
 
 	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType type, final UserId userId, final String requestTrackingId) {
@@ -132,23 +128,8 @@ public class DigipostUserAgreementsClient {
 		return agreements.getAgreements();
 	}
 
-	@Deprecated
-	public void deleteAgreement(final URI agreementPath, final String requestTrackingId) {
-		apiService.deleteAgrement(agreementPath, requestTrackingId, voidOkHandler());
-	}
-
 	public void deleteAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
 		apiService.deleteAgrement(senderId, agreementType, userId, requestTrackingId, voidOkHandler());
-	}
-
-	@Deprecated
-	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
-		return getDocuments(senderId, agreementType, userId, GetDocumentsQuery.builder().invoiceStatus(status).invoiceDueDateFrom(invoiceDueDateFrom).build(), null);
-	}
-
-	@Deprecated
-	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
-		return getDocuments(senderId, agreementType, userId, GetDocumentsQuery.builder().invoiceStatus(status).invoiceDueDateFrom(invoiceDueDateFrom).build(), requestTrackingId);
 	}
 
 	public List<Document> getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query) {
@@ -195,16 +176,6 @@ public class DigipostUserAgreementsClient {
 		apiService.updateInvoice(senderId, agreementType, documentId, new InvoiceUpdate(InvoiceStatus.DELETED), requestTrackingId, voidOkHandler());
 	}
 
-	@Deprecated
-	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom) {
-		return getDocumentCount(senderId, agreementType, userId, GetDocumentsQuery.builder().invoiceStatus(status).invoiceDueDateFrom(invoiceDueDateFrom).build(), null);
-	}
-
-	@Deprecated
-	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final InvoiceStatus status, final LocalDate invoiceDueDateFrom, final String requestTrackingId) {
-		return getDocumentCount(senderId, agreementType, userId, GetDocumentsQuery.builder().invoiceStatus(status).invoiceDueDateFrom(invoiceDueDateFrom).build(), requestTrackingId);
-	}
-
 	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query) {
 		return getDocumentCount(senderId, agreementType, userId, query, null);
 	}
@@ -242,24 +213,6 @@ public class DigipostUserAgreementsClient {
 				final StatusLine statusLine = response.getStatusLine();
 				if (isOkResponse(statusLine.getStatusCode())) {
 					return null;
-				} else {
-					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
-				}
-			}
-		};
-	}
-
-	private ResponseHandler<URI> createdWithLocationHandler() {
-		return new ResponseHandler<URI>() {
-			@Override
-			public URI handleResponse(final HttpResponse response) throws IOException {
-				final StatusLine statusLine = response.getStatusLine();
-				if (statusLine.getStatusCode() == HttpStatus.SC_CREATED) {
-					try {
-						return new URI(response.getFirstHeader(HttpHeaders.LOCATION).getValue());
-					} catch (URISyntaxException e) {
-						throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, "Invalid location header", e);
-					}
 				} else {
 					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
 				}

@@ -67,11 +67,11 @@ public class ApiService {
 		return executeHttpRequest(httpPost, handler);
 	}
 
-	public URI createAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId, final ResponseHandler<URI> handler) {
+	public void createAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId, final ResponseHandler<Void> handler) {
 		HttpPost httpPost = prepareHttpPost(userAgreementsPath(senderId));
 		httpPost.setEntity(marshallJaxbEntity(agreement));
 		addRequestTrackingHeader(httpPost, requestTrackingId);
-		return executeHttpRequest(httpPost, handler);
+		executeHttpRequest(httpPost, handler);
 	}
 
 	private String userAgreementsPath(final SenderId senderId) {
@@ -84,15 +84,6 @@ public class ApiService {
 
 	private String prependSenderIdToPath(final SenderId senderId, final String path) {
 		return ROOT + senderId.getId() + path;
-	}
-
-	public Agreement getAgreement(final URI agreementURI, final String requestTrackingId, final ResponseHandler<Agreement> handler) {
-		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(agreementURI.getPath());
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
 	}
 
 	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<GetAgreementResult> handler) {
@@ -114,13 +105,6 @@ public class ApiService {
 		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		addRequestTrackingHeader(httpGet, requestTrackingId);
 		return executeHttpRequest(httpGet, handler);
-	}
-
-	public void deleteAgrement(final URI agreementPath, final String requestTrackingId, final ResponseHandler<Void> handler) {
-		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint).setPath(agreementPath.getPath());
-		HttpDelete httpDelete = new HttpDelete(buildUri(uriBuilder));
-		addRequestTrackingHeader(httpDelete, requestTrackingId);
-		executeHttpRequest(httpDelete, handler);
 	}
 
 	public void deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<Void> handler) {

@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXB;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
@@ -36,13 +35,12 @@ public class MarshallingTest {
 	@Test
 	public void shouldMarshallUnmarshallAgreement() throws URISyntaxException {
 		final StringWriter xml = new StringWriter();
-		final Agreement agreement = Agreement.createInvoiceBankAgreement(new UserId("01017012345"), true);
-		final URI href = new URI("/user-agreements/123");
-		agreement.setHref(href);
+		final UserId userId = new UserId("01017012345");
+		final Agreement agreement = Agreement.createInvoiceBankAgreement(userId, true);
 		JAXB.marshal(agreement, xml);
 		log.debug(xml.toString());
 		final Agreement unmarshal = JAXB.unmarshal(new StringReader(xml.toString()), Agreement.class);
-		Assert.assertThat(unmarshal.getHref(), is(href));
+		Assert.assertThat(unmarshal.getUserId(), is(userId));
 	}
 
 	@Test

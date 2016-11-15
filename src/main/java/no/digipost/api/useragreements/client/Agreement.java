@@ -17,21 +17,17 @@ package no.digipost.api.useragreements.client;
 
 import no.digipost.api.useragreements.client.xml.AgreementTypeXmlAdapter;
 import no.digipost.api.useragreements.client.xml.AttributesMapAdapter;
-import no.digipost.api.useragreements.client.xml.URIXmlAdapter;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.net.URI;
 import java.util.HashMap;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Agreement {
-
-	@Deprecated
-	@XmlAttribute
-	@XmlJavaTypeAdapter(URIXmlAdapter.class)
-	private URI href;
 
 	@XmlElement(required = true)
 	@XmlJavaTypeAdapter(AgreementTypeXmlAdapter.class)
@@ -70,20 +66,9 @@ public class Agreement {
 		return attributes;
 	}
 
-	@Deprecated
-	public URI getHref() {
-		return href;
-	}
-
-	@Deprecated
-	public void setHref(final URI href) {
-		this.href = href;
-	}
-
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("Agreement{");
-		sb.append("href=").append(href);
 		sb.append(", type=").append(type);
 		sb.append(", userId='").append(userId).append('\'');
 		sb.append(", attributes=").append(attributes);
