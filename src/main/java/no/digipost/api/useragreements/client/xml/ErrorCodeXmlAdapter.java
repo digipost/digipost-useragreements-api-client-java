@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class ErrorCodeXmlAdapter extends XmlAdapter<String, ErrorCode> {
     @Override
     public ErrorCode unmarshal(String v) {
-        return ErrorCode.valueOf(v);
+        return ErrorCode.parse(v);
     }
 
     @Override
