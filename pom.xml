@@ -15,7 +15,7 @@
 
 	<artifactId>digipost-useragreements-api-client-java</artifactId>
 
-	<version>1.0-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
 
 	<name>Digipost User Agreements API Client</name>
 	<description>Java library for interacting with the Digipost UserAgreements API</description>
