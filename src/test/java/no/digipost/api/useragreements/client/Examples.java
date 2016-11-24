@@ -26,7 +26,7 @@ import java.util.List;
 public class Examples {
 
 	public void clientExample() {
-		InputStream key = getClass().getResourceAsStream("certificate.p12");
+		InputStream key = getClass().getResourceAsStream("no/digipost/api/useragreements/client/security/certificate.p12");
 
 		HttpHost proxy = new HttpHost("proxy.example.com", 8080, "http");
 
@@ -52,7 +52,7 @@ public class Examples {
 	}
 
 	public void agreementExamples() throws URISyntaxException {
-		InputStream key = getClass().getResourceAsStream("certificate.p12");
+		InputStream key = getClass().getResourceAsStream("no/digipost/api/useragreements/client/security/certificate.p12");
 
 		final BrokerId brokerId = new BrokerId(1005);
 		final SenderId senderId = new SenderId(1005);

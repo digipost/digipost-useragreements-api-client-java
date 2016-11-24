@@ -20,6 +20,8 @@ import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLServerSocketFactory;
 import java.io.InputStream;
@@ -29,24 +31,33 @@ import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.util.Arrays;
+import java.util.Enumeration;
 
 import static no.digipost.api.useragreements.client.ErrorCode.CLIENT_TECHNICAL_ERROR;
 
 public class CryptoUtil {
+	private static final Logger LOG = LoggerFactory.getLogger(CryptoUtil.class);
+
 	public static PrivateKey loadKeyFromP12(final InputStream certificateStream, final String passord) {
-		RSAPrivateCrtKey key;
 		try {
 			KeyStore keyStore = KeyStore.getInstance("PKCS12");
 			keyStore.load(certificateStream, passord.toCharArray());
-			String onlyKeyAlias = keyStore.aliases().nextElement();
-			key = (RSAPrivateCrtKey) keyStore.getKey(onlyKeyAlias, passord.toCharArray());
+			final Enumeration<String> aliases = keyStore.aliases();
+			while (aliases.hasMoreElements()) {
+				final String alias = aliases.nextElement();
+				LOG.debug("Trying to get private key for alias: " + alias);
+				if (keyStore.isKeyEntry(alias)) {
+					RSAPrivateCrtKey key = (RSAPrivateCrtKey) keyStore.getKey(alias, passord.toCharArray());
+					if (key != null) {
+						LOG.debug("Found private key for alias: " + alias);
+						return key;
+					}
+				}
+			}
 		} catch (Exception e) {
-			throw new RuntimeException("Det skjedde en feil ved lasting av nøkkelen", e);
+			throw new RuntimeException("Error loading private key", e);
 		}
-		if (key == null) {
-			throw new RuntimeException("Nøkkelen som ble lastet, var null");
-		}
-		return key;
+		throw new RuntimeException("No private key found in certificate file");
 	}
 
 	public static byte[] sign(final PrivateKey privateKey, final String messageToSign) {
