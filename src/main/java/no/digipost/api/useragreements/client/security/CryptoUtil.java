@@ -72,12 +72,12 @@ public class CryptoUtil {
 		}
 	}
 
-	public static void verify_AES256_CBC_Support() {
+	public static void addBouncyCastleProviderAndVerify_AES256_CBC_Support() {
 		try {
-			if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
-				Security.addProvider(new BouncyCastleProvider());
-			}
+			Security.addProvider(new BouncyCastleProvider());
+			LOG.debug("Registered BouncyCastleProvider");
 			new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(BouncyCastleProvider.PROVIDER_NAME).build();
+			LOG.debug("Support for AES256_CBC ok");
 		} catch (CMSException e) {
 			throw new RuntimeException("Feil under initialisering av algoritmer. Er Java Cryptographic Excetsions (JCE) installert?", e);
 		}
