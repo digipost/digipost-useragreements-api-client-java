@@ -59,6 +59,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class DigipostUserAgreementsClient {
 
+	static {
+		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(DigipostUserAgreementsClient.class);
 
 	private final ApiService apiService;
@@ -331,6 +335,7 @@ public class DigipostUserAgreementsClient {
 		}
 
 		public DigipostUserAgreementsClient build() {
+			CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
 			final ApiServiceProvider apiServiceProvider = new ApiServiceProvider();
 			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
 				@Override
