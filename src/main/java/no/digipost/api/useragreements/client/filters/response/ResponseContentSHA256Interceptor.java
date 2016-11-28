@@ -16,7 +16,6 @@
 package no.digipost.api.useragreements.client.filters.response;
 
 import no.digipost.api.useragreements.client.ServerSignatureException;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,9 +42,8 @@ public class ResponseContentSHA256Interceptor implements HttpResponseInterceptor
 
 		try {
 			final HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				byte[] entityBytes = IOUtils.toByteArray(entity.getContent());
-				EntityUtils.consume(entity);
+			if (entity != null && entity.getContent() != null) {
+				byte[] entityBytes = EntityUtils.toByteArray(entity);
 				if (entityBytes.length > 0) {
 					String hashHeader = findHeader(response, X_Content_SHA256);
 					if (isBlank(hashHeader)) {
