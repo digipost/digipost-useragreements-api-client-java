@@ -90,6 +90,10 @@ public class DigipostUserAgreementsClient {
 		apiService.createAgreement(senderId, agreement, requestTrackingId, voidOkHandler());
 	}
 
+	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType type, final UserId userId) {
+		return getAgreement(senderId, type, userId, null);
+	}
+
 	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType type, final UserId userId, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(type, "agreementType cannot be null");
@@ -130,6 +134,10 @@ public class DigipostUserAgreementsClient {
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId) {
 		final Agreements agreements = apiService.getAgreements(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(Agreements.class));
 		return agreements.getAgreements();
+	}
+
+	public void deleteAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId) {
+		deleteAgreement(senderId, agreementType, userId, null);
 	}
 
 	public void deleteAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId) {
