@@ -3,6 +3,7 @@
 # Java client library for Digipost User Agreement API
 
 Online documentation: https://digipost.github.io/digipost-useragreements-api-client-java
+
 API specification: https://github.com/digipost/invoice-api-specification
 
 ## Java Cryptographic Extension
