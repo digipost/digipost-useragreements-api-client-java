@@ -16,69 +16,101 @@
 package no.digipost.api.useragreements.client;
 
 import org.apache.http.HttpHost;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.joda.time.LocalDate;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
+
+import static no.digipost.api.useragreements.client.AgreementType.INVOICE_BANK;
 
 public class Examples {
 
-	public void clientExample() {
+	private DigipostUserAgreementsClient client;
+
+	public void instantiate_client() {
 		InputStream key = getClass().getResourceAsStream("certificate.p12");
 
 		HttpHost proxy = new HttpHost("proxy.example.com", 8080, "http");
 
 		final BrokerId brokerId = new BrokerId(1234L);
+
+		DigipostUserAgreementsClient client = new DigipostUserAgreementsClient
+				.Builder(brokerId, key, "password")
+				.useProxy(proxy) //optional
+				.setHttpClientBuilder(HttpClientBuilder.create()) //optional
+				.serviceEndpoint(URI.create("https://api.digipost.no")) //optional
+				.build();
+	}
+
+	public void identify_user() {
 		final SenderId senderId = new SenderId(1234L);
-
-		DigipostUserAgreementsClient client = new DigipostUserAgreementsClient.Builder(brokerId, key, "password").useProxy(proxy).build();
-
 		final UserId userId = new UserId("01017012345");
 
 		final IdentificationResult identificationResult = client.identifyUser(senderId, userId);
 		boolean isDigipost = identificationResult.getResult() == IdentificationResultCode.DIGIPOST;
-
-		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, true));
-
-		final List<Agreement> agreements = client.getAgreements(senderId, userId);
-
-		final List<Document> documents = client.getDocuments(senderId, AgreementType.INVOICE_BANK, userId, GetDocumentsQuery.empty());
-
-		final List<Document> moreDocuments = client.getDocuments(senderId, AgreementType.INVOICE_BANK, userId, GetDocumentsQuery.builder().invoiceStatus(InvoiceStatus.UNPAID).build());
-
-		final List<Document> evenMoreDocuments = client.getDocuments(senderId, AgreementType.INVOICE_BANK, userId, GetDocumentsQuery.builder().invoiceDueDateFrom(new LocalDate(2016, 1, 1)).build());
 	}
 
-	public void agreementExamples() throws URISyntaxException {
-		InputStream key = getClass().getResourceAsStream("certificate.p12");
-
-		final BrokerId brokerId = new BrokerId(1005);
-		final SenderId senderId = new SenderId(1005);
-
-		final DigipostUserAgreementsClient.Builder builder = new DigipostUserAgreementsClient.Builder(brokerId, key, "password")
-				.serviceEndpoint(new URI("https://api.test.digipost.no"))
-				.useProxy(new HttpHost("proxy.example.com", 8080))
-				.veryDangerouslyDisableCertificateVerificationWhichIsAbsolutelyUnfitForProductionCode();
-		final DigipostUserAgreementsClient client = builder.build();
-
-		final String requestTrackingId = "testing-testing-testing";
+	public void crud_agreement() {
+		final SenderId senderId = new SenderId(1234L);
 		final UserId userId = new UserId("01017012345");
 
 		//CreateAgreement
-		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, false), requestTrackingId);
+		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, false));
 
 		//GetAgreement
-		final GetAgreementResult agreement = client.getAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
-		System.out.println(agreement);
+		final GetAgreementResult agreement = client.getAgreement(senderId, INVOICE_BANK, userId);
 
 		//UpdateAgreement
-		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, true), requestTrackingId);
-		final GetAgreementResult modifiedAgreement = client.getAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
-		System.out.println(modifiedAgreement);
+		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, true));
 
 		//DeleteAgreement
-		client.deleteAgreement(senderId, AgreementType.INVOICE_BANK, userId, requestTrackingId);
+		client.deleteAgreement(senderId, INVOICE_BANK, userId);
+	}
+
+	public void check_invoice_agreement() {
+		final SenderId senderId = new SenderId(1234L);
+		final UserId userId = new UserId("01017012345");
+
+		final GetAgreementResult agreementResult = client.getAgreement(senderId, INVOICE_BANK, userId);
+		if (agreementResult.isSuccess()) {
+			final Agreement agreement = agreementResult.getAgreement();
+		} else {
+			switch (agreementResult.getFailedReason()) {
+				case UNKNOWN_USER: //User does not hav a Digipost account
+				case NO_AGREEMENT: //No agreement exist for user
+			}
+		}
+	}
+
+	public void get_invoices() {
+		final SenderId senderId = new SenderId(1234L);
+		final UserId userId = new UserId("01017012345");
+
+		final List<Document> unpaidInvoice = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.empty());
+
+		final List<Document> allOptions = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.builder()
+				.invoiceStatus(InvoiceStatus.PAID)
+				.invoiceDueDateFrom(new LocalDate(2017, 1, 1))
+				.invoiceDueDateTo(new LocalDate(2017, 5, 1))
+				.build());
+	}
+
+	public void update_invoice_status() {
+		final SenderId senderId = new SenderId(1234L);
+		final UserId userId = new UserId("01017012345");
+
+		final List<Document> unpaidInvoice = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.empty());
+		final Document invoice = unpaidInvoice.get(0);
+
+		//set status to PAID
+		client.payInvoice(senderId, INVOICE_BANK, invoice.getId(), new InvoicePayment(123));
+
+		//set status to DELETED
+		client.deleteInvoice(senderId, INVOICE_BANK, invoice.getId());
+
+		//generic version
+		client.updateInvoice(senderId, INVOICE_BANK, invoice.getId(), new InvoiceUpdate(InvoiceStatus.PAID, 123));
 	}
 }

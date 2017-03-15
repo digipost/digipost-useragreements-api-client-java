@@ -243,6 +243,7 @@
 						<exclude>**/*.xsd</exclude>
 						<exclude>**/*.jks</exclude>
 						<exclude>**/user-agent.properties</exclude>
+						<exclude>docs/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
