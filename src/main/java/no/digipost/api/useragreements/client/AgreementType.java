@@ -15,19 +15,19 @@
  */
 package no.digipost.api.useragreements.client;
 
-public enum AgreementType {
-
-	INVOICE_BANK("invoice-bank");
+public class AgreementType {
 
 	public static final String QUERY_PARAM_NAME = "agreement-type";
 
 	private final String type;
 
-	AgreementType(final String type) {
+	public AgreementType(final String type) {
 		this.type = type;
 	}
 
 	public String getType() {
 		return type;
 	}
+
+	public static AgreementType INVOICE_BANK = new AgreementType("invoice-bank");
 }
