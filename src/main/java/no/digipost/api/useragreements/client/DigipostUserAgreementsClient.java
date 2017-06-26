@@ -37,6 +37,7 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,7 +215,19 @@ public class DigipostUserAgreementsClient {
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
+		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
+		return agreementUsers.getUsers();
+	}
+
+	public List<UserId> getAgreementsUsersAfterDate(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final Instant afterDate) {
+		return getAgreementsUsersAfterDate(senderId, agreementType, smsNotificationEnabled, afterDate, null);
+	}
+
+	public List<UserId> getAgreementsUsersAfterDate(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final Instant afterDate, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		Objects.requireNonNull(afterDate, "afterDate cannot be null");
+		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, afterDate, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
 		return agreementUsers.getUsers();
 	}
 

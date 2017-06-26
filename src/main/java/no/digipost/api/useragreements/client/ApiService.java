@@ -29,6 +29,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.joda.time.Instant;
 import org.joda.time.format.ISODateTimeFormat;
 
 import javax.xml.bind.JAXB;
@@ -191,13 +192,16 @@ public class ApiService {
 		return executeHttpRequest(httpGet, handler);
 	}
 
-	public AgreementUsers getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId, final ResponseHandler<AgreementUsers> handler) {
+	public AgreementUsers getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final Instant afterDate, final String requestTrackingId, final ResponseHandler<AgreementUsers> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId) + "/agreement-users")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		if (smsNotificationsEnabled != null) {
 			uriBuilder
 				.setParameter("invoice-sms-notification", smsNotificationsEnabled.toString());
+		}
+		if(afterDate != null){
+			uriBuilder.setParameter("agreements-after-date",afterDate.toString());
 		}
 
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
@@ -279,4 +283,5 @@ public class ApiService {
 	};
 
 	private final SingleCached<EntryPoint> cachedEntryPoint = new SingleCached<>("digipost-entrypoint", entryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
+
 }
