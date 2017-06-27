@@ -208,10 +208,22 @@ public class DigipostUserAgreementsClient {
 		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(DocumentContent.class));
 	}
 
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		return getAgreementUsers(senderId, agreementType, null, null, null);
+	}
+
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, null);
+	}
+
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Instant afterDate) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		return getAgreementUsers(senderId, agreementType, null, afterDate,null);
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final Instant afterDate) {
@@ -224,6 +236,12 @@ public class DigipostUserAgreementsClient {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, requestTrackingId);
+	}
+
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Instant afterDate, final String requestTrackingId) {
+		Objects.requireNonNull(senderId, "senderId cannot be null");
+		Objects.requireNonNull(agreementType, "agreementType cannot be null");
+		return getAgreementUsers(senderId, agreementType, null, afterDate, requestTrackingId);
 	}
 
 	public List<UserId> getAgreementUsers (final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final Instant afterDate, final String requestTrackingId) {
