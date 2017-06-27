@@ -220,6 +220,10 @@ public class DigipostUserAgreementsClient {
 		return getAgreementUsers(senderId, agreementType, null, afterDate,null);
 	}
 
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final String requestTrackingId) {
+		return getAgreementUsers(senderId, agreementType, null, null, requestTrackingId);
+	}
+
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final Instant afterDate) {
 		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, afterDate,null);
 	}
