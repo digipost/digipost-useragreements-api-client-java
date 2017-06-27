@@ -37,6 +37,7 @@ import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,14 +208,38 @@ public class DigipostUserAgreementsClient {
 		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(DocumentContent.class));
 	}
 
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType) {
+		return getAgreementUsers(senderId, agreementType, null, null, null);
+	}
+
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
-		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null);
+		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, null);
+	}
+
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Instant afterDate) {
+		return getAgreementUsers(senderId, agreementType, null, afterDate,null);
+	}
+
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final String requestTrackingId) {
+		return getAgreementUsers(senderId, agreementType, null, null, requestTrackingId);
+	}
+
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final Instant afterDate) {
+		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, afterDate,null);
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
+		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, requestTrackingId);
+	}
+
+	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Instant afterDate, final String requestTrackingId) {
+		return getAgreementUsers(senderId, agreementType, null, afterDate, requestTrackingId);
+	}
+
+	public List<UserId> getAgreementUsers (final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final Instant afterDate, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
+		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, afterDate, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
 		return agreementUsers.getUsers();
 	}
 
