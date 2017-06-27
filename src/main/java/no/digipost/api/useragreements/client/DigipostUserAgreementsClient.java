@@ -215,32 +215,22 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, null);
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Instant afterDate) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return getAgreementUsers(senderId, agreementType, null, afterDate,null);
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final Instant afterDate) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, afterDate,null);
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, requestTrackingId);
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Instant afterDate, final String requestTrackingId) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return getAgreementUsers(senderId, agreementType, null, afterDate, requestTrackingId);
 	}
 
