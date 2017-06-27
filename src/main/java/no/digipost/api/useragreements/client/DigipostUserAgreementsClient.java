@@ -209,8 +209,6 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return getAgreementUsers(senderId, agreementType, null, null, null);
 	}
 
