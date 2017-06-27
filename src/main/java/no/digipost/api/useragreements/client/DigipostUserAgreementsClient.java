@@ -213,20 +213,12 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
-		Objects.requireNonNull(senderId, "senderId cannot be null");
-		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
-		return agreementUsers.getUsers();
+		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null, requestTrackingId);
 	}
 
-	public List<UserId> getAgreementsUsersAfterDate(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String afterDate) {
-		return getAgreementsUsersAfterDate(senderId, agreementType, smsNotificationEnabled, afterDate, null);
-	}
-
-	public List<UserId> getAgreementsUsersAfterDate(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String afterDate, final String requestTrackingId) {
+	public List<UserId> getAgreementUsers (final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String afterDate, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		Objects.requireNonNull(afterDate, "afterDate cannot be null");
 		Instant afterDateInstant = Instant.parse(afterDate);
 		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, afterDateInstant, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
 		return agreementUsers.getUsers();
