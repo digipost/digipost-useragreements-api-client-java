@@ -284,5 +284,4 @@ public class ApiService {
 	};
 
 	private final SingleCached<EntryPoint> cachedEntryPoint = new SingleCached<>("digipost-entrypoint", entryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
-
 }
