@@ -201,7 +201,8 @@ public class ApiService {
 				.setParameter("invoice-sms-notification", smsNotificationsEnabled.toString());
 		}
 		if(afterDate != null){
-			uriBuilder.setParameter("agreements-after-date",afterDate.toString());
+			uriBuilder
+				.setParameter("agreements-after-date",afterDate.toString());
 		}
 
 		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
