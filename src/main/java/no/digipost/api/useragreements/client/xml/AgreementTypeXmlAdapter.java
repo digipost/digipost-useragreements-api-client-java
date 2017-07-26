@@ -22,11 +22,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class AgreementTypeXmlAdapter extends XmlAdapter<String,AgreementType> {
     @Override
     public AgreementType unmarshal(String v) {
-        for (AgreementType t : AgreementType.values()) {
-            if ( t.getType().compareTo(v) == 0 )
-                return t;
-        }
-        throw new IllegalArgumentException("Value " + v + " is illegal for " + AgreementType.class);
+		return new AgreementType(v);
     }
 
     @Override
