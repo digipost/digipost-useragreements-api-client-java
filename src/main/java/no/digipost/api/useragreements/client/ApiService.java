@@ -16,7 +16,6 @@
 package no.digipost.api.useragreements.client;
 
 import no.digipost.cache.inmemory.SingleCached;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -32,6 +31,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.joda.time.format.ISODateTimeFormat;
 
 import javax.xml.bind.JAXB;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -231,7 +232,7 @@ public class ApiService {
 	}
 
 	private HttpEntity marshallJaxbEntity(final Object obj) {
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		ByteArrayOutputStream bao = new ByteArrayOutputStream(1024);
 		JAXB.marshal(obj, bao);
 		return new ByteArrayEntity(bao.toByteArray());
 	}

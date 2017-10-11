@@ -25,14 +25,15 @@ import org.apache.http.protocol.HttpContext;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.joda.time.DateTimeZone.UTC;
@@ -44,6 +45,9 @@ import static org.mockito.Mockito.when;
 public class ResponseDateInterceptorTest {
 
 	private ResponseDateInterceptor responseDateInterceptor;
+
+	@Rule
+	public final MockitoRule mockito = MockitoJUnit.rule();
 
 	@Mock
 	private HttpContext httpContextMock;
@@ -59,7 +63,6 @@ public class ResponseDateInterceptorTest {
 
 	@Test
 	public void skal_kaste_exception_når_Date_header_mangler() throws IOException, HttpException {
-		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
 		try {
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle ha kastet feil grunnet manglende Date-header");
@@ -70,7 +73,6 @@ public class ResponseDateInterceptorTest {
 
 	@Test
 	public void skal_kaste_custom_exception_når_Date_header_mangler() throws IOException, HttpException {
-		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
 		try {
 			ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
@@ -82,10 +84,7 @@ public class ResponseDateInterceptorTest {
 
 	@Test
 	public void skal_kaste_feil_når_Date_header_er_på_feil_format() throws IOException, HttpException {
-		List<BasicHeader> headers = new ArrayList<>();
-		headers.add(new BasicHeader("Date", "16. januar 2012 - 16:14:23"));
-		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
-		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
+		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "16. januar 2012 - 16:14:23"));
 		try {
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet feilaktig Date header format");
@@ -97,10 +96,7 @@ public class ResponseDateInterceptorTest {
 	@Test
 	public void skal_kaste_feil_når_Date_header_er_for_ny() throws IOException, HttpException {
 		DateTimeUtils.setCurrentMillisFixed(new DateTime(2014, 11, 4, 21, 00, 58, UTC).getMillis());
-		List<BasicHeader> headers = new ArrayList<>();
-		headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
-		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
-		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
+		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
 		try {
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet for ny Date header");
@@ -112,10 +108,7 @@ public class ResponseDateInterceptorTest {
 	@Test
 	public void skal_kaste_feil_når_Date_header_er_for_gammel() throws IOException, HttpException {
 		DateTimeUtils.setCurrentMillisFixed(new DateTime(2014, 11, 4, 21, 20, 58, UTC).getMillis());
-		List<BasicHeader> headers = new ArrayList<>();
-		headers.add(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
-		when(httpResponseMock.getAllHeaders()).thenReturn(headers.toArray(new BasicHeader[0]));
-		when(httpResponseMock.getFirstHeader("Date")).thenReturn(headers.get(0));
+		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
 		try {
 			responseDateInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet for gammel Date header");

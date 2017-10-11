@@ -15,11 +15,11 @@
  */
 package no.digipost.api.useragreements.client.filters.request;
 
+import com.google.common.io.ByteStreams;
 import no.digipost.api.useragreements.client.Headers;
 import no.digipost.api.useragreements.client.security.ClientRequestToSign;
 import no.digipost.api.useragreements.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.useragreements.client.security.Signer;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -64,7 +64,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 			if (rqEntity == null) {
 				setSignatureHeader(httpRequest);
 			} else {
-				byte[] entityBytes = IOUtils.toByteArray(rqEntity.getContent());
+				byte[] entityBytes = ByteStreams.toByteArray(rqEntity.getContent());
 				hashFilter.settContentHashHeader(entityBytes, request);
 				setSignatureHeader(httpRequest);
 			}
