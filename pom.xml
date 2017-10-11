@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>no.digipost</groupId>
 		<artifactId>digipost-open-super-pom</artifactId>
-		<version>0.3</version>
+		<version>1</version>
 		<relativePath />
 	</parent>
 
@@ -34,7 +34,6 @@
 	<description>Java library for interacting with the Digipost UserAgreements API</description>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
 
