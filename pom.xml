@@ -88,9 +88,9 @@
 			<version>3.0.1</version>
 		</dependency>
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>23.1-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -117,47 +117,23 @@
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.contrib</groupId>
-			<artifactId>junit-theories</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>
-			<version>1.3</version>
-			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-core</artifactId>
-			<version>1.3</version>
+			<artifactId>java-hamcrest</artifactId>
+			<version>2.0.0.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 			<version>2.10.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>nl.jqno.equalsverifier</groupId>
-			<artifactId>equalsverifier</artifactId>
-			<version>2.3.3</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.pholser</groupId>
-			<artifactId>junit-quickcheck-core</artifactId>
-			<version>0.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.pholser</groupId>
-			<artifactId>junit-quickcheck-generators</artifactId>
-			<version>0.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -373,22 +349,21 @@
 									<includes>
 										<include>org.bouncycastle:bcprov-jdk15on:${bouncycastle.version}:jar:compile</include>
 										<include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
-										<include>commons-io:commons-io</include>
 										<include>org.apache.commons:commons-lang3</include>
 										<include>com.sun.xml.bind:jaxb-core:${jaxb.version}:jar:compile</include>
 										<include>com.sun.xml.bind:jaxb-impl:${jaxb.version}:jar:compile</include>
 										<include>org.joda:joda-convert</include>
 										<include>joda-time:joda-time</include>
 										<include>org.javassist:javassist:*:jar:test</include>
-										<include>org.jvnet.mimepull:mimepull:*:jar:compile</include>
 										<include>org.slf4j:slf4j-api:*:jar:compile</include>
 										<include>org.slf4j:slf4j-simple:*:jar:test</include>
-										<include>com.github.runeflobakk:motif</include>
-										<include>org.apache.pdfbox:fontbox</include>
-										<include>org.apache.pdfbox:pdfbox</include>
-										<include>org.apache.pdfbox:jempbox</include>
 										<include>no.digipost:cache</include>
+										<include>com.github.runeflobakk:motif</include>
 										<include>com.google.guava:guava</include>
+										<include>com.google.code.findbugs:jsr305</include>
+										<include>com.google.j2objc:j2objc-annotations</include>
+										<include>org.codehaus.mojo:animal-sniffer-annotations</include>
+										<include>com.google.errorprone:error_prone_annotations</include>
 										<include>no.digipost:http-client-builder3</include>
 										<include>org.apache.httpcomponents:httpclient</include>
 										<include>commons-codec:commons-codec</include>
