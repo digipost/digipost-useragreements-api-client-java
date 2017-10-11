@@ -25,17 +25,17 @@ import no.digipost.api.useragreements.client.filters.response.ResponseSignatureI
 import no.digipost.api.useragreements.client.security.CryptoUtil;
 import no.digipost.api.useragreements.client.security.PrivateKeySigner;
 import no.digipost.api.useragreements.client.util.Supplier;
-import no.digipost.http.client.DigipostHttpClientFactory;
-import no.digipost.http.client.DigipostHttpClientSettings;
+import no.digipost.http.client3.DigipostHttpClientFactory;
+import no.digipost.http.client3.DigipostHttpClientSettings;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +44,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import javax.xml.bind.DataBindingException;
 import javax.xml.bind.JAXB;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -316,7 +317,7 @@ public class DigipostUserAgreementsClient {
 			return this;
 		}
 
-        public Builder setHttpClientBuilder(final HttpClientBuilder HttpClientBuilder) {
+        public Builder setHttpClientBuilder(final HttpClientBuilder httpClientBuilder) {
             this.httpClientBuilder = httpClientBuilder;
             return this;
         }

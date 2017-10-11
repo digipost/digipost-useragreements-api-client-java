@@ -17,32 +17,34 @@ package no.digipost.api.useragreements.client.filters.response;
 
 import no.digipost.api.useragreements.client.ApiService;
 import no.digipost.api.useragreements.client.ServerSignatureException;
+import no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptorTest.StatusLineMock;
 import no.digipost.api.useragreements.client.util.Supplier;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.cookie.CookieOrigin;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptorTest.StatusLineMock;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ResponseSignatureFilterTest {
 
 	private ResponseSignatureInterceptor responseSignatureInterceptor;
+
+	@Rule
+	public final MockitoRule mockito = MockitoJUnit.rule();
 
 	@Mock
 	private ApiService apiServiceMock;
@@ -62,7 +64,6 @@ public class ResponseSignatureFilterTest {
 			}
 		});
 		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
-		when(httpResponseMock.getAllHeaders()).thenReturn(new BasicHeader[]{});
 		when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
 	}
 
