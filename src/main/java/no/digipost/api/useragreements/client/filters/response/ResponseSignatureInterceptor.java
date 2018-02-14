@@ -31,7 +31,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -50,7 +54,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) {
-		if ("/".equals(((CookieOrigin)(context.getAttribute("http.cookie-origin"))).getPath())) {
+		if ("/".equals(((CookieOrigin) context.getAttribute("http.cookie-origin")).getPath())) {
 			log.debug("Verifiserer ikke signatur fordi det er rotressurs vi hentet.");
 			return;
 		}
@@ -68,8 +72,7 @@ public class ResponseSignatureInterceptor implements HttpResponseInterceptor {
 			if (!verified) {
 				throw new ServerSignatureException(response.getStatusLine(), "Melding fra server matcher ikke signatur.");
 			} else {
-				log.debug("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren " + X_Digipost_Signature
-						+ " var OK: " + serverSignaturBase64);
+				log.debug("Verifiserte signert respons fra Digipost. Signatur fra HTTP-headeren {} var OK: {}", X_Digipost_Signature, serverSignaturBase64);
 			}
 		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
 			throw new ServerSignatureException(response.getStatusLine(), "Det skjedde en feil under signatursjekk: " + e.getMessage(), e);

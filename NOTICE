@@ -15,8 +15,6 @@ This software includes third party software subject to the following licenses:
   Apache HttpCore under Apache License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
-  Byte Buddy (without dependencies) under The Apache Software License, Version 2.0
-  Byte Buddy Java agent under The Apache Software License, Version 2.0
   Digipost Caching under The Apache Software License, Version 2.0
   Digipost HTTP Client Builder under The Apache Software License, Version 2.0
   Digipost User Agreements API Client under The Apache Software License, Version 2.0
@@ -24,13 +22,8 @@ This software includes third party software subject to the following licenses:
   FindBugs-jsr305 under The Apache Software License, Version 2.0
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   J2ObjC Annotations under The Apache Software License, Version 2.0
-  Java Hamcrest under BSD Licence 3
   JCL 1.2 implemented over SLF4J under MIT License
   Joda-Time under Apache 2
-  JUnit under Eclipse Public License 1.0
-  mockito-core under The MIT License
   Motif under Apache License 2.0
-  Objenesis under Apache 2
   SLF4J API Module under MIT License
-  SLF4J Simple Binding under MIT License
 
