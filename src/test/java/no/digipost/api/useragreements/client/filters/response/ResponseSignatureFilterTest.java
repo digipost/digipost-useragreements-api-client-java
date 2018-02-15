@@ -21,7 +21,7 @@ import no.digipost.api.useragreements.client.filters.response.ResponseDateInterc
 import no.digipost.api.useragreements.client.util.Supplier;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
-import org.apache.http.cookie.CookieOrigin;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Before;
 import org.junit.Rule;
@@ -63,7 +63,7 @@ public class ResponseSignatureFilterTest {
 				return apiServiceMock.getEntryPoint().getCertificate().getBytes();
 			}
 		});
-		when(httpContextMock.getAttribute(anyString())).thenReturn(new CookieOrigin("host", 123, "/some/resource", true));
+		when(httpContextMock.getAttribute(anyString())).thenReturn(new HttpGet("http://host/some/resource"));
 		when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
 	}
 
@@ -73,7 +73,7 @@ public class ResponseSignatureFilterTest {
 			responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet manglende signatur header");
 		} catch (ServerSignatureException e) {
-			assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
+			assertThat(e.getMessage(), containsString("X-Digipost-Signature-header mangler"));
 		}
 	}
 
@@ -89,7 +89,7 @@ public class ResponseSignatureFilterTest {
 			responseSignatureInterceptor.process(httpResponseMock, httpContextMock);
 			fail("Skulle kastet feil grunnet manglende signatur header");
 		} catch (ServerSignatureException e) {
-			assertThat(e.getMessage(), containsString("Mangler X-Digipost-Signature-header"));
+			assertThat(e.getMessage(), containsString("X-Digipost-Signature-header mangler"));
 		}
 	}
 
