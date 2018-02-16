@@ -20,6 +20,6 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 
 public class RequestContentSHA256Filter extends RequestContentHashFilter {
 	public RequestContentSHA256Filter() {
-		super(SHA256Digest.class, Headers.X_Content_SHA256);
+		super(SHA256Digest::new, Headers.X_Content_SHA256);
 	}
 }

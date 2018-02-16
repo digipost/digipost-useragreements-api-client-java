@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.security;
+package no.digipost.api.useragreements.client.filters.request;
 
 import org.apache.http.HttpHeaders;
 
@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
-import static no.digipost.api.useragreements.client.Headers.*;
+import static no.digipost.api.useragreements.client.Headers.Content_MD5;
+import static no.digipost.api.useragreements.client.Headers.X_Content_SHA256;
+import static no.digipost.api.useragreements.client.Headers.X_Digipost_UserId;
 
-public class RequestMessageSignatureUtil {
+final class RequestMessageSignatureUtil {
 
 	private static final List<String> HEADERS_FOR_SIGNATURE = Arrays.asList(Content_MD5.toLowerCase(), HttpHeaders.DATE.toLowerCase(),
 			X_Digipost_UserId.toLowerCase(), X_Content_SHA256.toLowerCase());
@@ -64,6 +66,10 @@ public class RequestMessageSignatureUtil {
 
 	private static boolean isHeaderForSignature(final String key) {
 		return HEADERS_FOR_SIGNATURE.contains(key.toLowerCase());
+	}
+
+
+	private RequestMessageSignatureUtil() {
 	}
 
 }

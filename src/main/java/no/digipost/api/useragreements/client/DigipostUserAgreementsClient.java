@@ -19,9 +19,7 @@ import no.digipost.api.useragreements.client.filters.request.RequestContentSHA25
 import no.digipost.api.useragreements.client.filters.request.RequestDateInterceptor;
 import no.digipost.api.useragreements.client.filters.request.RequestSignatureInterceptor;
 import no.digipost.api.useragreements.client.filters.request.RequestUserAgentInterceptor;
-import no.digipost.api.useragreements.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptor;
-import no.digipost.api.useragreements.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.useragreements.client.security.CryptoUtil;
 import no.digipost.api.useragreements.client.security.PrivateKeySigner;
 import no.digipost.api.useragreements.client.util.Supplier;
@@ -40,8 +38,6 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
 import javax.xml.bind.DataBindingException;
 import javax.xml.bind.JAXB;
 
@@ -52,6 +48,7 @@ import java.net.URI;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -283,9 +280,9 @@ public class DigipostUserAgreementsClient {
 		private final BrokerId brokerId;
 		private final InputStream certificateP12File;
 		private final String certificatePassword;
+		private final Optional<PrivateKey> privateKey;
 		private HttpClientBuilder httpClientBuilder;
-		private HttpHost proxyHost;
-		private PrivateKey privateKey;
+		private Optional<HttpHost> proxyHost = Optional.empty();
 
 		public Builder(final BrokerId brokerId, InputStream certificateP12File, String certificatePassword){
 			this(brokerId, certificateP12File, certificatePassword, null);
@@ -302,13 +299,13 @@ public class DigipostUserAgreementsClient {
 			}
 			this.certificateP12File = certificateP12File;
 			this.certificatePassword = certificatePassword;
-			this.privateKey = privateKey;
+			this.privateKey = Optional.ofNullable(privateKey);
 			serviceEndpoint(PRODUCTION_ENDPOINT);
 			httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 		}
 
 		public Builder useProxy(final HttpHost proxyHost) {
-			this.proxyHost = proxyHost;
+			this.proxyHost = Optional.ofNullable(proxyHost);
 			return this;
 		}
 
@@ -329,15 +326,10 @@ public class DigipostUserAgreementsClient {
 			SSLContextBuilder sslContextBuilder= new SSLContextBuilder();
 			try {
 				sslContextBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build(), new HostnameVerifier() {
-					@Override
-					public boolean verify(String s, SSLSession sslSession) {
-						return true;
-					}
-				});
+				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build(), (hostname, session) -> true);
 				httpClientBuilder.setSSLSocketFactory(sslConnectionSocketFactory);
 			} catch (Exception e) {
-				throw new RuntimeException("Could not disable certificate verification: " + e);
+				throw new RuntimeException("Could not disable certificate verification: " + e.getMessage(), e);
 			}
 			System.err.println("Not checking validity of certificates for any hostnames");
 			return this;
@@ -345,31 +337,15 @@ public class DigipostUserAgreementsClient {
 
 		public DigipostUserAgreementsClient build() {
 			CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-			final ApiServiceProvider apiServiceProvider = new ApiServiceProvider();
-			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
-				@Override
-				public byte[] get() {
-					return apiServiceProvider.getApiService().getEntryPoint().getCertificate().getBytes();
-				}
-			});
 
 			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor());
 			httpClientBuilder.addInterceptorLast(new RequestUserAgentInterceptor());
-			if (privateKey == null) {
-				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new PrivateKeySigner(certificateP12File, certificatePassword), new RequestContentSHA256Filter()));
-			} else {
-				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new PrivateKeySigner(privateKey), new RequestContentSHA256Filter()));
-			}
+			PrivateKeySigner pkSigner = privateKey.map(PrivateKeySigner::new).orElseGet(() -> new PrivateKeySigner(certificateP12File, certificatePassword));
+			httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(pkSigner, new RequestContentSHA256Filter()));
 			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor());
-			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
-			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);
+			proxyHost.ifPresent(httpClientBuilder::setProxy);
 
-			if (proxyHost != null) {
-				httpClientBuilder.setProxy(proxyHost);
-			}
-
-			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());
-			apiServiceProvider.setApiService(apiService);
+			ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());
 			return new DigipostUserAgreementsClient(apiService);
 		}
 	}
