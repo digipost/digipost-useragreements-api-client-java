@@ -26,14 +26,15 @@ import java.util.function.Supplier;
 public abstract class RequestContentHashFilter {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
+
 	private final Supplier<? extends ExtendedDigest> digestSupplier;
 	private final String header;
 	private final Base64.Encoder base64Encoder;
 
-	public RequestContentHashFilter(Supplier<? extends ExtendedDigest> digestSupplier, final String header) {
+	public RequestContentHashFilter(final Supplier<? extends ExtendedDigest> digestSupplier, final String header) {
 		this.digestSupplier = digestSupplier;
 		this.header = header;
-		base64Encoder = Base64.getEncoder();
+		this.base64Encoder = Base64.getEncoder();
 	}
 
 	public void settContentHashHeader(final byte[] data, final HttpRequest httpRequest) {

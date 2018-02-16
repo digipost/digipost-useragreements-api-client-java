@@ -171,8 +171,8 @@
 							<param>${project.basedir}/src/main/notice/license-mappings.xml</param>
 						</licenseMapping>
 						<excludeScopes>
-                            <excludeScope>test</excludeScope>
-                        </excludeScopes>
+							<excludeScope>test</excludeScope>
+						</excludeScopes>
 					</configuration>
 				</plugin>
 				<plugin>
