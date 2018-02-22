@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,5 +40,22 @@ public class Agreements {
 
 	public List<Agreement> getAgreements() {
 		return agreements;
+	}
+
+	/**
+	 * Convenience method with fail-fast to retrieve the {@link Agreement} from an
+	 * {@link Agreements} instance expected to contain exactly one Agreement.
+	 *
+	 * @return the single agreement expected to be contained in this {@code Agreements} instance.
+	 * @throws IllegalStateException if this object contains none or more than one {@code Agreement}.
+	 */
+	public Agreement getSingleAgreement() {
+		if (agreements.isEmpty()) {
+			throw new IllegalStateException("Contained 0 agreements, but expected to be exactly one.");
+		} else if (agreements.size() > 1) {
+			throw new IllegalStateException("Expected exactly one, but contained " + agreements.size() + " agreements: " + agreements);
+		} else {
+			return agreements.get(0);
+		}
 	}
 }

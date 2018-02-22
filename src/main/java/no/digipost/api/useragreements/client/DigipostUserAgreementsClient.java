@@ -101,7 +101,7 @@ public class DigipostUserAgreementsClient {
 				final StatusLine status = response.getStatusLine();
 
 				if (status.getStatusCode() == HttpStatus.SC_OK) {
-					return new GetAgreementResult(unmarshallEntity(response, Agreement.class));
+					return new GetAgreementResult(unmarshallEntity(response, Agreements.class).getSingleAgreement());
 				} else if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND){
 					final Error error = readErrorFromResponse(response);
 					if (error.hasCode(ErrorCode.UNKNOWN_USER_ID)) {
