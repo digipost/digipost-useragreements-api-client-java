@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLServerSocketFactory;
+
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -55,7 +56,7 @@ public class CryptoUtil {
 				}
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Error loading private key", e);
+			throw new RuntimeException("Error loading private key: '" + e.getMessage() + "'", e);
 		}
 		throw new RuntimeException("No private key found in certificate file");
 	}

@@ -15,7 +15,7 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.util.Supplier;
+import java.util.function.Supplier;
 
 public class GetAgreementResult {
 

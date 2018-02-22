@@ -22,7 +22,6 @@ import no.digipost.api.useragreements.client.filters.request.RequestUserAgentInt
 import no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptor;
 import no.digipost.api.useragreements.client.security.CryptoUtil;
 import no.digipost.api.useragreements.client.security.PrivateKeySigner;
-import no.digipost.api.useragreements.client.util.Supplier;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import no.digipost.http.client3.DigipostHttpClientSettings;
 import org.apache.http.HttpHost;
@@ -105,16 +104,10 @@ public class DigipostUserAgreementsClient {
 					return new GetAgreementResult(unmarshallEntity(response, Agreement.class));
 				} else if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND){
 					final Error error = readErrorFromResponse(response);
-					final Supplier<UnexpectedResponseException> agreementMissingExceptionSupplier = new Supplier<UnexpectedResponseException>() {
-						@Override
-						public UnexpectedResponseException get() {
-							return new UnexpectedResponseException(status, error);
-						}
-					};
 					if (error.hasCode(ErrorCode.UNKNOWN_USER_ID)) {
-						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, agreementMissingExceptionSupplier);
+						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, () -> new UnexpectedResponseException(status, error));
 					} else if (error.hasCode(ErrorCode.AGREEMENT_NOT_FOUND)) {
-						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, agreementMissingExceptionSupplier);
+						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, () -> new UnexpectedResponseException(status, error));
 					} else {
 						throw new UnexpectedResponseException(status, error);
 					}
