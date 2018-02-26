@@ -18,9 +18,8 @@ package no.digipost.api.useragreements.client;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -36,12 +35,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import static no.digipost.api.useragreements.client.Headers.X_Digipost_UserId;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntities;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntity;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
-import static org.apache.http.HttpStatus.SC_OK;
 import static org.joda.time.Duration.standardMinutes;
 
 public class ApiService {
@@ -81,6 +82,21 @@ public class ApiService {
 				.setPath(userAgreementsPath(senderId))
 				.setParameter("user-id", userId.getPersonalIdentificationNumber());
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
+	}
+
+	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(userAgreementsPath(senderId))
+				.setParameter("agreement-type", agreementType.getType());
+		HttpGet request = newGetRequest(uriBuilder, requestTrackingId);
+		request.setHeader(X_Digipost_UserId, brokerId.serialize());
+		CloseableHttpResponse response;
+		try {
+			response = httpClient.execute(request);
+			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, Agreements.class).flatMap(a -> a.getAgreements().stream()));
+		} catch (IOException e) {
+			throw new RuntimeIOException(e.getMessage(), e);
+		}
 	}
 
 	public void deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<Void> handler) {
@@ -175,7 +191,7 @@ public class ApiService {
 			request.setHeader(X_Digipost_UserId, brokerId.serialize());
 			return httpClient.execute(request, handler);
 		} catch (IOException e) {
-			throw new RuntimeIOException(e);
+			throw RuntimeIOException.from(e);
 		}
 	}
 
@@ -238,25 +254,11 @@ public class ApiService {
 
 
 	private EntryPoint performGetEntryPoint() {
-		return executeHttpRequest(newGetRequest(serviceEndpoint, null), new ResponseHandler<EntryPoint>() {
-			@Override
-			public EntryPoint handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
-				if (response.getStatusLine().getStatusCode() == SC_OK) {
-					return DigipostUserAgreementsClient.unmarshallEntity(response, EntryPoint.class);
-				} else {
-					Error error = DigipostUserAgreementsClient.readErrorFromResponse(response);
-					throw new UnexpectedResponseException(response.getStatusLine(), error);
-				}
-			}
-		});
+		return executeHttpRequest(newGetRequest(serviceEndpoint, null),
+				response -> mapOkResponseOrThrowException(response, r -> unmarshallEntity(r, EntryPoint.class)));
 	}
 
-	private final Callable<EntryPoint> entryPoint = new Callable<EntryPoint>() {
-		@Override
-		public EntryPoint call() {
-			return performGetEntryPoint();
-		}
-	};
 
-	private final SingleCached<EntryPoint> cachedEntryPoint = new SingleCached<>("digipost-entrypoint", entryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
+	private final SingleCached<EntryPoint> cachedEntryPoint =
+			new SingleCached<>("digipost-entrypoint", this::performGetEntryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
 }

@@ -35,6 +35,7 @@ public enum ErrorCode {
 	SIGNATURE_ERROR,
 	IO_EXCEPTION,
 	NO_ENTITY,
+	MULTIPLE_ENTITIES,
 	GENERAL_ERROR;
 
 	public static ErrorCode parse(final String error) {

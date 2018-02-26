@@ -25,7 +25,6 @@ import no.digipost.api.useragreements.client.security.PrivateKeySigner;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import no.digipost.http.client3.DigipostHttpClientSettings;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ResponseHandler;
@@ -33,23 +32,19 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.DataBindingException;
-import javax.xml.bind.JAXB;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.isOkResponse;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.readErrorEntity;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntity;
 
 /**
  * API client for managing Digipost documents on behalf of users
@@ -59,8 +54,6 @@ public class DigipostUserAgreementsClient {
 	static {
 		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
 	}
-
-	private static final Logger LOG = LoggerFactory.getLogger(DigipostUserAgreementsClient.class);
 
 	private final ApiService apiService;
 
@@ -75,7 +68,7 @@ public class DigipostUserAgreementsClient {
 	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		return apiService.identifyUser(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(IdentificationResult.class));
+		return apiService.identifyUser(senderId, userId, requestTrackingId, singleJaxbEntityHandler(IdentificationResult.class));
 	}
 
 	public void createOrReplaceAgreement(final SenderId senderId, final Agreement agreement) {
@@ -95,27 +88,30 @@ public class DigipostUserAgreementsClient {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(type, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		return apiService.getAgreement(senderId, type, userId, requestTrackingId, new ResponseHandler<GetAgreementResult>() {
-			@Override
-			public GetAgreementResult handleResponse(final HttpResponse response) throws IOException {
-				final StatusLine status = response.getStatusLine();
-
-				if (status.getStatusCode() == HttpStatus.SC_OK) {
-					return new GetAgreementResult(unmarshallEntity(response, Agreements.class).getSingleAgreement());
-				} else if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND){
-					final Error error = readErrorFromResponse(response);
+		return apiService.getAgreement(senderId, type, userId, requestTrackingId, response -> {
+			StatusLine status = response.getStatusLine();
+			if (isOkResponse(status.getStatusCode())) {
+				return new GetAgreementResult(unmarshallEntity(response, Agreements.class).getSingleAgreement());
+			} else {
+				final Error error = readErrorEntity(response);
+				if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 					if (error.hasCode(ErrorCode.UNKNOWN_USER_ID)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, () -> new UnexpectedResponseException(status, error));
 					} else if (error.hasCode(ErrorCode.AGREEMENT_NOT_FOUND)) {
 						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, () -> new UnexpectedResponseException(status, error));
-					} else {
-						throw new UnexpectedResponseException(status, error);
 					}
-				} else {
-					throw new UnexpectedResponseException(status, readErrorFromResponse(response));
 				}
+				throw new UnexpectedResponseException(status, error);
 			}
 		});
+	}
+
+	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType) {
+		return getAgreementsOfType(senderId, agreementType, null);
+	}
+
+	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType, String requestTrackingId) {
+		return apiService.getAgreementsOfType(senderId, agreementType, requestTrackingId);
 	}
 
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId) {
@@ -123,8 +119,7 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId) {
-		final Agreements agreements = apiService.getAgreements(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(Agreements.class));
-		return agreements.getAgreements();
+		return apiService.getAgreements(senderId, userId, requestTrackingId, singleJaxbEntityHandler(Agreements.class)).getAgreements();
 	}
 
 	public void deleteAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId) {
@@ -143,7 +138,7 @@ public class DigipostUserAgreementsClient {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, query, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
+		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, query, requestTrackingId, singleJaxbEntityHandler(Documents.class));
 		return documents.getDocuments();
 	}
 
@@ -152,7 +147,7 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public Document getDocument(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
-		return apiService.getDocument(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(Document.class));
+		return apiService.getDocument(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(Document.class));
 	}
 
 	public void payInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoicePayment) {
@@ -187,7 +182,7 @@ public class DigipostUserAgreementsClient {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		return apiService.getDocumentCount(senderId, agreementType, userId, query, requestTrackingId, simpleJAXBEntityHandler(DocumentCount.class)).getCount();
+		return apiService.getDocumentCount(senderId, agreementType, userId, query, requestTrackingId, singleJaxbEntityHandler(DocumentCount.class)).getCount();
 	}
 
 	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId) {
@@ -195,7 +190,7 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
-		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(DocumentContent.class));
+		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(DocumentContent.class));
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
@@ -205,64 +200,16 @@ public class DigipostUserAgreementsClient {
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
+		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, singleJaxbEntityHandler(AgreementUsers.class));
 		return agreementUsers.getUsers();
 	}
 
 	private ResponseHandler<Void> voidOkHandler() {
-		return new ResponseHandler<Void>() {
-			@Override
-			public Void handleResponse(final HttpResponse response) throws IOException {
-				final StatusLine statusLine = response.getStatusLine();
-				if (isOkResponse(statusLine.getStatusCode())) {
-					return null;
-				} else {
-					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
-				}
-			}
-		};
+		return response -> mapOkResponseOrThrowException(response, r -> null);
 	}
 
-	private <T> ResponseHandler<T> simpleJAXBEntityHandler(final Class<T> responseType){
-		return new ResponseHandler<T>() {
-			@Override
-			public T handleResponse(final HttpResponse response) throws IOException {
-				final StatusLine statusLine = response.getStatusLine();
-				if (isOkResponse(statusLine.getStatusCode())) {
-					return unmarshallEntity(response, responseType);
-				} else {
-					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
-				}
-			}
-		};
-	}
-
-	public static boolean isOkResponse(final int status) {
-		return status / 100 == 2;
-	}
-
-	public static <T> T unmarshallEntity(final HttpResponse response, final Class<T> returnType) {
-		final StatusLine statusLine = response.getStatusLine();
-		try {
-			final byte[] body = EntityUtils.toByteArray(response.getEntity());
-			if (body.length == 0) {
-				throw new UnexpectedResponseException(statusLine, ErrorCode.NO_ENTITY, "Message body is empty");
-			}
-			if (LOG.isTraceEnabled()) {
-				LOG.trace(new String(body, UTF_8));
-			}
-			try {
-				return JAXB.unmarshal(new ByteArrayInputStream(body), returnType);
-			} catch (IllegalStateException | DataBindingException e) {
-				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, new String(body, UTF_8), e);
-			}
-		} catch (IOException e) {
-			throw new UnexpectedResponseException(statusLine, ErrorCode.IO_EXCEPTION, e.getMessage(), e);
-		}
-	}
-
-	public static Error readErrorFromResponse(final HttpResponse response) {
-		return unmarshallEntity(response, Error.class);
+	private <T> ResponseHandler<T> singleJaxbEntityHandler(Class<T> responseType) {
+		return response -> mapOkResponseOrThrowException(response, r -> unmarshallEntity(r, responseType));
 	}
 
 	public static class Builder {

@@ -17,15 +17,20 @@ package no.digipost.api.useragreements.client;
 
 public class RuntimeIOException extends UserAgreementsApiException {
 
+	public static RuntimeIOException from(Throwable cause) {
+		if (cause instanceof RuntimeIOException) {
+			return (RuntimeIOException) cause;
+		} else {
+			return new RuntimeIOException(cause != null ? cause.getClass().getSimpleName() + ": '" + cause.getMessage() + "'" : null, cause);
+		}
+	}
+
 	public RuntimeIOException(final String message) {
-		super(ErrorCode.IO_EXCEPTION, message);
+		this(message, null);
 	}
 
 	public RuntimeIOException(final String message, final Throwable cause) {
 		super(ErrorCode.IO_EXCEPTION, message, cause);
 	}
 
-	public RuntimeIOException(final Throwable cause) {
-		super(ErrorCode.IO_EXCEPTION, cause);
-	}
 }
