@@ -15,9 +15,13 @@
  */
 package no.digipost.api.useragreements.client;
 
-public class AgreementType {
+public final class AgreementType {
+
+	public static final AgreementType INVOICE_BANK = new AgreementType("invoice-bank");
+	public static final AgreementType BANK_ACCOUNT_NUMBER_FOR_RECEIPTS = new AgreementType("account-num-for-receipts");
 
 	public static final String QUERY_PARAM_NAME = "agreement-type";
+
 
 	private final String type;
 
@@ -29,5 +33,9 @@ public class AgreementType {
 		return type;
 	}
 
-	public static AgreementType INVOICE_BANK = new AgreementType("invoice-bank");
+	@Override
+	public String toString() {
+		return "AgreementType '" + getType() + "'";
+	}
+
 }
