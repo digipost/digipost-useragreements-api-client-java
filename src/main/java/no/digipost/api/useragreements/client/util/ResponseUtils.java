@@ -49,7 +49,7 @@ import static no.digipost.api.useragreements.client.ErrorCode.NO_ENTITY;
 
 public final class ResponseUtils {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ResponseUtils.class);
+	private static final Logger RESPONSE_PAYLOAD_LOG = LoggerFactory.getLogger("no.digipost.api.useragreements.client.response_payload");
 
 	private static final Pattern startOfNewXmlDocument = Pattern.compile("(?<=\\>)\\s*(?=\\<\\?[xX][mM][lL])");
 
@@ -84,7 +84,7 @@ public final class ResponseUtils {
 
 	public static <T> Stream<T> unmarshallEntities(final HttpResponse response, final Class<T> returnType) {
 		return streamXmlDocumentsOf(getResponseEntityContent(response))
-				.peek(LOG::trace)
+				.peek(RESPONSE_PAYLOAD_LOG::trace)
 				.map(xml -> {
 					try {
 						return JAXB.unmarshal(new ByteArrayInputStream(xml.getBytes()), returnType);
