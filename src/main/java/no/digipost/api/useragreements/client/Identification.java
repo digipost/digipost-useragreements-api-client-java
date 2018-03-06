@@ -15,44 +15,40 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.xml.UserIdXmlAdapter;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import static no.digipost.api.useragreements.client.PersonalIdentificationNumber.mask;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "identification", propOrder = {
-		"userId"
+		"personalIdentificationNumber"
 })
 @XmlRootElement(name = "identification")
-public class Identification {
+public final class Identification {
 
-	@XmlElement(name = "personal-identification-number", type = String.class )
-	@XmlJavaTypeAdapter(UserIdXmlAdapter.class)
-	protected UserId userId;
+	@XmlElement(name = "personal-identification-number")
+	private String personalIdentificationNumber;
 
-	public Identification(final UserId userId) {
-		this.userId = userId;
+	public Identification(String personalIdentificationNumber) {
+		this.personalIdentificationNumber = personalIdentificationNumber;
 	}
 
 	//JAXB
 	public Identification() {
-
 	}
 
-	@Deprecated
-	public String getPersonalIdentificationNumber() {
-		return userId.getPersonalIdentificationNumber();
-	}
-
-	public UserId getUserId() {
-		return userId;
+	public UserId toUserId() {
+		return new UserId(personalIdentificationNumber);
 	}
 
 	@Override
 	public String toString() {
-		return userId.getPersonalIdentificationNumber();
+		return mask(personalIdentificationNumber);
 	}
 }
 

@@ -62,7 +62,7 @@ public class ApiService {
 	}
 
 	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId, final ResponseHandler<IdentificationResult> handler) {
-		return executeHttpRequest(newPostRequest(getEntryPoint().getIdentificationUri(), requestTrackingId, new Identification(userId)), handler);
+		return executeHttpRequest(newPostRequest(getEntryPoint().getIdentificationUri(), requestTrackingId, new Identification(userId.serialize())), handler);
 	}
 
 	public void createAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId, final ResponseHandler<Void> handler) {
@@ -72,7 +72,7 @@ public class ApiService {
 	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<GetAgreementResult> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
-				.setParameter("user-id", userId.getPersonalIdentificationNumber())
+				.setParameter("user-id", userId.serialize())
 				.setParameter("agreement-type", agreementType.getType());
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
@@ -80,7 +80,7 @@ public class ApiService {
 	public Agreements getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId, final ResponseHandler<Agreements> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
-				.setParameter("user-id", userId.getPersonalIdentificationNumber());
+				.setParameter("user-id", userId.serialize());
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
@@ -102,7 +102,7 @@ public class ApiService {
 	public void deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<Void> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
-				.setParameter("user-id", userId.getPersonalIdentificationNumber())
+				.setParameter("user-id", userId.serialize())
 				.setParameter("agreement-type", agreementType.getType());
 		HttpDelete deleteAgreementRequest = new HttpDelete(buildUri(uriBuilder));
 		executeHttpRequest(withRequestTrackingHeader(deleteAgreementRequest, requestTrackingId), handler);
@@ -111,7 +111,7 @@ public class ApiService {
 	public Documents getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<Documents> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId))
-				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
+				.setParameter(UserId.QUERY_PARAM_NAME, userId.serialize())
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		setGetDocumentsQueryParams(uriBuilder, query);
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
@@ -152,7 +152,7 @@ public class ApiService {
 	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<DocumentCount> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/count")
-				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
+				.setParameter(UserId.QUERY_PARAM_NAME, userId.serialize())
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		setGetDocumentsQueryParams(uriBuilder, query);
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);

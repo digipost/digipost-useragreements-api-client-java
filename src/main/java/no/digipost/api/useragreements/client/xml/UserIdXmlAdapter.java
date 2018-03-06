@@ -17,9 +17,16 @@ package no.digipost.api.useragreements.client.xml;
 
 import no.digipost.api.useragreements.client.UserId;
 
-public class UserIdXmlAdapter extends JustAValidXmlAdapter<UserId> {
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+public class UserIdXmlAdapter extends XmlAdapter<String, UserId> {
     @Override
     public UserId unmarshal(String value) {
         return new UserId(value);
     }
+
+	@Override
+	public String marshal(UserId userId) {
+		return userId.serialize();
+	}
 }

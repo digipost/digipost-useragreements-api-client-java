@@ -15,21 +15,9 @@
  */
 package no.digipost.api.useragreements.client;
 
-/**
- * A user id string. May be e.g. a personal identification number (Norwegian national ID number),
- * or a bank account number.
- */
-public class UserId extends JustA<String> {
+final class PersonalIdentificationNumber {
 
-	public static final String QUERY_PARAM_NAME = "user-id";
-
-	public UserId(String userIdString) {
-		super(userIdString);
+	static String mask(String personalIdentificationNumber) {
+		return personalIdentificationNumber != null ? personalIdentificationNumber.substring(0, Math.min(6, personalIdentificationNumber.length())) + "*****" : "null";
 	}
-
-	@Override
-	public String serialize() {
-		return this.value;
-	}
-
 }
