@@ -5,8 +5,8 @@ version: 1.0
 # url of the download button
 downloadUrl: https://github.com/digipost/digipost-useragreements-api-client-java
 # licence of the software
-license: MIT License
-licenseUrl: http://opensource.org/licenses/MIT
+license: The Apache Software License, Version 2.0
+licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
 
 baseurl: "/digipost-useragreements-api-client-java"
 
