@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class UserIdXmlAdapter extends XmlAdapter<String, UserId> {
     @Override
     public UserId unmarshal(String value) {
-        return new UserId(value);
+        return UserId.of(value);
     }
 
 	@Override

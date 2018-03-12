@@ -43,7 +43,7 @@ public final class Identification {
 	}
 
 	public UserId toUserId() {
-		return new UserId(personalIdentificationNumber);
+		return UserId.of(personalIdentificationNumber);
 	}
 
 	@Override

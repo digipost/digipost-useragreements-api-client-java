@@ -15,23 +15,21 @@
  */
 package no.digipost.api.useragreements.client;
 
-public class SenderId extends JustAValid<Long> {
+public class SenderId extends JustA<Long> {
 
-	public SenderId(final long id) {
-		super(id, "SenderId must be numeric > 0");
+	public static SenderId of(long id) {
+		return new SenderId(id);
+	}
+
+	private SenderId(final long id) {
+		super(id, String::valueOf);
+		if (id <= 0) {
+			throw new IllegalArgumentException("sender id must be numeric > 0, but was " + id);
+		}
 	}
 
 	public long getId() {
 		return value;
 	}
 
-	@Override
-	public String serialize() {
-		return String.valueOf(value);
-	}
-
-	@Override
-	public boolean isValid(final Long value) {
-		return value > 0;
-	}
 }

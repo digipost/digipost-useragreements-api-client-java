@@ -15,6 +15,8 @@
  */
 package no.digipost.api.useragreements.client;
 
+import java.util.function.Function;
+
 /**
  * A user id string. May be e.g. a personal identification number (Norwegian national ID number),
  * or a bank account number.
@@ -23,13 +25,12 @@ public class UserId extends JustA<String> {
 
 	public static final String QUERY_PARAM_NAME = "user-id";
 
-	public UserId(String userIdString) {
-		super(userIdString);
+	public static UserId of(String userIdString) {
+		return new UserId(userIdString);
 	}
 
-	@Override
-	public String serialize() {
-		return this.value;
+	private UserId(String userIdString) {
+		super(userIdString, Function.identity());
 	}
 
 }

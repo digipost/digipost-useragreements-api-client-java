@@ -18,7 +18,7 @@ import static no.digipost.api.useragreements.client.AgreementType.BANK_ACCOUNT_N
 ...
 
 // The ID of the receipt supplier party, i.e. the organization with access to bank account numbers
-SenderId sender = new SenderId(1234L);
+SenderId sender = SenderId.of(1234L);
 
 // The stream is made available immediately when the client starts receiving the response,
 // which is a rather long chunked http response. The processing of the stream should

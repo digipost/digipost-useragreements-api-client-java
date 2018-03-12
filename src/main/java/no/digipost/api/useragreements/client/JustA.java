@@ -21,13 +21,16 @@
 package no.digipost.api.useragreements.client;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public abstract class JustA<T> {
 
     protected final T value;
+	private final Function<? super T, String> valueSerializer;
 
-    protected JustA(T value) {
+    protected JustA(T value, Function<? super T, String> valueSerializer) {
         this.value = value;
+		this.valueSerializer = valueSerializer;
     }
 
     @Override
@@ -53,5 +56,7 @@ public abstract class JustA<T> {
 				'}';
 	}
 
-	public abstract String serialize();
+	public final String serialize() {
+		return valueSerializer.apply(value);
+	}
 }

@@ -34,7 +34,7 @@ public class Examples {
 
 		HttpHost proxy = new HttpHost("proxy.example.com", 8080, "http");
 
-		final BrokerId brokerId = new BrokerId(1234L);
+		final BrokerId brokerId = BrokerId.of(1234L);
 
 		DigipostUserAgreementsClient client = new DigipostUserAgreementsClient
 				.Builder(brokerId, key, "password")
@@ -45,16 +45,16 @@ public class Examples {
 	}
 
 	public void identify_user() {
-		final SenderId senderId = new SenderId(1234L);
-		final UserId userId = new UserId("01017012345");
+		final SenderId senderId = SenderId.of(1234L);
+		final UserId userId = UserId.of("01017012345");
 
 		final IdentificationResult identificationResult = client.identifyUser(senderId, userId);
 		boolean isDigipost = identificationResult.getResult() == IdentificationResultCode.DIGIPOST;
 	}
 
 	public void crud_agreement() {
-		final SenderId senderId = new SenderId(1234L);
-		final UserId userId = new UserId("01017012345");
+		final SenderId senderId = SenderId.of(1234L);
+		final UserId userId = UserId.of("01017012345");
 
 		//CreateAgreement
 		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, false));
@@ -70,8 +70,8 @@ public class Examples {
 	}
 
 	public void check_invoice_agreement() {
-		final SenderId senderId = new SenderId(1234L);
-		final UserId userId = new UserId("01017012345");
+		final SenderId senderId = SenderId.of(1234L);
+		final UserId userId = UserId.of("01017012345");
 
 		final GetAgreementResult agreementResult = client.getAgreement(senderId, INVOICE_BANK, userId);
 		if (agreementResult.isSuccess()) {
@@ -85,8 +85,8 @@ public class Examples {
 	}
 
 	public void get_invoices() {
-		final SenderId senderId = new SenderId(1234L);
-		final UserId userId = new UserId("01017012345");
+		final SenderId senderId = SenderId.of(1234L);
+		final UserId userId = UserId.of("01017012345");
 
 		final List<Document> unpaidInvoice = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.empty());
 
@@ -98,8 +98,8 @@ public class Examples {
 	}
 
 	public void update_invoice_status() {
-		final SenderId senderId = new SenderId(1234L);
-		final UserId userId = new UserId("01017012345");
+		final SenderId senderId = SenderId.of(1234L);
+		final UserId userId = UserId.of("01017012345");
 
 		final List<Document> unpaidInvoice = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.empty());
 		final Document invoice = unpaidInvoice.get(0);

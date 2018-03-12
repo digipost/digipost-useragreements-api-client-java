@@ -16,7 +16,7 @@ InputStream key = getClass().getResourceAsStream("certificate.p12");
 
 HttpHost proxy = new HttpHost("proxy.example.com", 8080, "http");
 
-final BrokerId brokerId = new BrokerId(1234L);
+final BrokerId brokerId = BrokerId.of(1234L);
 
 DigipostUserAgreementsClient client = new DigipostUserAgreementsClient
 		.Builder(brokerId, key, "password")
@@ -29,8 +29,8 @@ DigipostUserAgreementsClient client = new DigipostUserAgreementsClient
 ### Identify Digipost user
 
 ```java
-final SenderId senderId = new SenderId(1234L);
-final UserId userId = new UserId("01017012345");
+final SenderId senderId = SenderId.of(1234L);
+final UserId userId = UserId.of("01017012345");
 
 final IdentificationResult identificationResult = client.identifyUser(senderId, userId);
 boolean isDigipost = identificationResult.getResult() == IdentificationResultCode.DIGIPOST;

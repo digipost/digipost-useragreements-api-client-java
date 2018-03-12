@@ -13,8 +13,8 @@ The agreement type `INVOICE_BANK` allows a sender to retrieve a user's invoices 
 ### Create, read, update and delete agreement
 
 ```java
-final SenderId senderId = new SenderId(1234L);
-final UserId userId = new UserId("01017012345");
+final SenderId senderId = SenderId.of(1234L);
+final UserId userId = UserId.of("01017012345");
 
 //CreateAgreement
 client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, false));
@@ -32,8 +32,8 @@ client.deleteAgreement(senderId, INVOICE_BANK, userId);
 ### Get and verify invoice agreement
 
 ```java
-final SenderId senderId = new SenderId(1234L);
-final UserId userId = new UserId("01017012345");
+final SenderId senderId = SenderId.of(1234L);
+final UserId userId = UserId.of("01017012345");
 
 final GetAgreementResult agreementResult = client.getAgreement(senderId, INVOICE_BANK, userId);
 if (agreementResult.isSuccess()) {
@@ -49,8 +49,8 @@ if (agreementResult.isSuccess()) {
 ### Get invoices
 
 ```java
-final SenderId senderId = new SenderId(1234L);
-final UserId userId = new UserId("01017012345");
+final SenderId senderId = SenderId.of(1234L);
+final UserId userId = UserId.of("01017012345");
 
 final List<Document> unpaidInvoice = client.getDocuments(senderId, INVOICE_BANK, userId,
 	GetDocumentsQuery.empty());
@@ -65,8 +65,8 @@ final List<Document> allOptions = client.getDocuments(senderId, INVOICE_BANK, us
 ### Update invoice status
 
 ```java
-final SenderId senderId = new SenderId(1234L);
-final UserId userId = new UserId("01017012345");
+final SenderId senderId = SenderId.of(1234L);
+final UserId userId = UserId.of("01017012345");
 
 final List<Document> unpaidInvoice = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.empty());
 final Document invoice = unpaidInvoice.get(0);

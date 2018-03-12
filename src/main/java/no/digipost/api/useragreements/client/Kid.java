@@ -15,23 +15,18 @@
  */
 package no.digipost.api.useragreements.client;
 
-public class Kid extends JustAValid<String> {
+import java.util.function.Function;
 
-    public Kid(String value) {
-        super(value, "Kid can not be null");
+import static java.util.Objects.requireNonNull;
+
+public class Kid extends JustA<String> {
+
+	public static Kid of(String kid) {
+		return new Kid(kid);
+	}
+
+    private Kid(String value) {
+        super(requireNonNull(value, "Kid can not be null"), Function.identity());
     }
 
-    public static Kid of(String kid) {
-        return new Kid(kid);
-    }
-
-    @Override
-    public String serialize() {
-        return value;
-    }
-
-    @Override
-    public boolean isValid(String value) {
-        return value != null;
-    }
 }

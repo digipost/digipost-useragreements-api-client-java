@@ -60,7 +60,7 @@ public class Agreement {
 	}
 
 	public UserId getUserId() {
-		return new UserId(userId);
+		return UserId.of(userId);
 	}
 
 	public HashMap<String, String> getAttributes() {

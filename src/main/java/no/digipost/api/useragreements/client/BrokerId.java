@@ -15,23 +15,21 @@
  */
 package no.digipost.api.useragreements.client;
 
-public class BrokerId extends JustAValid<Long> {
+public class BrokerId extends JustA<Long> {
 
-	public BrokerId(final long id) {
-		super(id, "BrokerId must be numeric > 0");
+	public static BrokerId of(long id) {
+		return new BrokerId(id);
+	}
+
+	private BrokerId(final long id) {
+		super(id, String::valueOf);
+		if (id <= 0) {
+			throw new IllegalArgumentException("broker id must be numeric > 0");
+		}
 	}
 
 	public long getId() {
 		return value;
 	}
 
-	@Override
-	public String serialize() {
-		return String.valueOf(value);
-	}
-
-	@Override
-	public boolean isValid(final Long value) {
-		return value > 0;
-	}
 }
