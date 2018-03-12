@@ -17,6 +17,8 @@ package no.digipost.api.useragreements.client;
 
 public class RuntimeIOException extends UserAgreementsApiException {
 
+	private static final long serialVersionUID = 1;
+
 	public static RuntimeIOException from(Throwable cause) {
 		if (cause instanceof RuntimeIOException) {
 			return (RuntimeIOException) cause;
