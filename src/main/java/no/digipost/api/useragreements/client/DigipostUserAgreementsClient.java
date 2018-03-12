@@ -19,16 +19,12 @@ import no.digipost.api.useragreements.client.filters.request.RequestContentSHA25
 import no.digipost.api.useragreements.client.filters.request.RequestDateInterceptor;
 import no.digipost.api.useragreements.client.filters.request.RequestSignatureInterceptor;
 import no.digipost.api.useragreements.client.filters.request.RequestUserAgentInterceptor;
-import no.digipost.api.useragreements.client.filters.response.ResponseContentSHA256Interceptor;
 import no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptor;
-import no.digipost.api.useragreements.client.filters.response.ResponseSignatureInterceptor;
 import no.digipost.api.useragreements.client.security.CryptoUtil;
 import no.digipost.api.useragreements.client.security.PrivateKeySigner;
-import no.digipost.api.useragreements.client.util.Supplier;
 import no.digipost.http.client3.DigipostHttpClientFactory;
 import no.digipost.http.client3.DigipostHttpClientSettings;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ResponseHandler;
@@ -36,24 +32,19 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
-import javax.xml.bind.DataBindingException;
-import javax.xml.bind.JAXB;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.isOkResponse;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.readErrorEntity;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntity;
 
 /**
  * API client for managing Digipost documents on behalf of users
@@ -63,8 +54,6 @@ public class DigipostUserAgreementsClient {
 	static {
 		CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
 	}
-
-	private static final Logger LOG = LoggerFactory.getLogger(DigipostUserAgreementsClient.class);
 
 	private final ApiService apiService;
 
@@ -79,7 +68,7 @@ public class DigipostUserAgreementsClient {
 	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		return apiService.identifyUser(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(IdentificationResult.class));
+		return apiService.identifyUser(senderId, userId, requestTrackingId, singleJaxbEntityHandler(IdentificationResult.class));
 	}
 
 	public void createOrReplaceAgreement(final SenderId senderId, final Agreement agreement) {
@@ -99,33 +88,30 @@ public class DigipostUserAgreementsClient {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(type, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		return apiService.getAgreement(senderId, type, userId, requestTrackingId, new ResponseHandler<GetAgreementResult>() {
-			@Override
-			public GetAgreementResult handleResponse(final HttpResponse response) throws IOException {
-				final StatusLine status = response.getStatusLine();
-
-				if (status.getStatusCode() == HttpStatus.SC_OK) {
-					return new GetAgreementResult(unmarshallEntity(response, Agreement.class));
-				} else if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND){
-					final Error error = readErrorFromResponse(response);
-					final Supplier<UnexpectedResponseException> agreementMissingExceptionSupplier = new Supplier<UnexpectedResponseException>() {
-						@Override
-						public UnexpectedResponseException get() {
-							return new UnexpectedResponseException(status, error);
-						}
-					};
+		return apiService.getAgreement(senderId, type, userId, requestTrackingId, response -> {
+			StatusLine status = response.getStatusLine();
+			if (isOkResponse(status.getStatusCode())) {
+				return new GetAgreementResult(unmarshallEntity(response, Agreements.class).getSingleAgreement());
+			} else {
+				final Error error = readErrorEntity(response);
+				if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
 					if (error.hasCode(ErrorCode.UNKNOWN_USER_ID)) {
-						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, agreementMissingExceptionSupplier);
+						return new GetAgreementResult(GetAgreementResult.FailedReason.UNKNOWN_USER, () -> new UnexpectedResponseException(status, error));
 					} else if (error.hasCode(ErrorCode.AGREEMENT_NOT_FOUND)) {
-						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, agreementMissingExceptionSupplier);
-					} else {
-						throw new UnexpectedResponseException(status, error);
+						return new GetAgreementResult(GetAgreementResult.FailedReason.NO_AGREEMENT, () -> new UnexpectedResponseException(status, error));
 					}
-				} else {
-					throw new UnexpectedResponseException(status, readErrorFromResponse(response));
 				}
+				throw new UnexpectedResponseException(status, error);
 			}
 		});
+	}
+
+	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType) {
+		return getAgreementsOfType(senderId, agreementType, null);
+	}
+
+	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType, String requestTrackingId) {
+		return apiService.getAgreementsOfType(senderId, agreementType, requestTrackingId);
 	}
 
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId) {
@@ -133,8 +119,7 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId) {
-		final Agreements agreements = apiService.getAgreements(senderId, userId, requestTrackingId, simpleJAXBEntityHandler(Agreements.class));
-		return agreements.getAgreements();
+		return apiService.getAgreements(senderId, userId, requestTrackingId, singleJaxbEntityHandler(Agreements.class)).getAgreements();
 	}
 
 	public void deleteAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId) {
@@ -153,7 +138,7 @@ public class DigipostUserAgreementsClient {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, query, requestTrackingId, simpleJAXBEntityHandler(Documents.class));
+		final Documents documents = apiService.getDocuments(senderId, agreementType, userId, query, requestTrackingId, singleJaxbEntityHandler(Documents.class));
 		return documents.getDocuments();
 	}
 
@@ -162,7 +147,7 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public Document getDocument(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
-		return apiService.getDocument(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(Document.class));
+		return apiService.getDocument(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(Document.class));
 	}
 
 	public void payInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoicePayment) {
@@ -197,7 +182,7 @@ public class DigipostUserAgreementsClient {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
-		return apiService.getDocumentCount(senderId, agreementType, userId, query, requestTrackingId, simpleJAXBEntityHandler(DocumentCount.class)).getCount();
+		return apiService.getDocumentCount(senderId, agreementType, userId, query, requestTrackingId, singleJaxbEntityHandler(DocumentCount.class)).getCount();
 	}
 
 	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId) {
@@ -205,7 +190,7 @@ public class DigipostUserAgreementsClient {
 	}
 
 	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
-		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, simpleJAXBEntityHandler(DocumentContent.class));
+		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(DocumentContent.class));
 	}
 
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
@@ -215,64 +200,16 @@ public class DigipostUserAgreementsClient {
 	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, simpleJAXBEntityHandler(AgreementUsers.class));
+		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, singleJaxbEntityHandler(AgreementUsers.class));
 		return agreementUsers.getUsers();
 	}
 
 	private ResponseHandler<Void> voidOkHandler() {
-		return new ResponseHandler<Void>() {
-			@Override
-			public Void handleResponse(final HttpResponse response) throws IOException {
-				final StatusLine statusLine = response.getStatusLine();
-				if (isOkResponse(statusLine.getStatusCode())) {
-					return null;
-				} else {
-					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
-				}
-			}
-		};
+		return response -> mapOkResponseOrThrowException(response, r -> null);
 	}
 
-	private <T> ResponseHandler<T> simpleJAXBEntityHandler(final Class<T> responseType){
-		return new ResponseHandler<T>() {
-			@Override
-			public T handleResponse(final HttpResponse response) throws IOException {
-				final StatusLine statusLine = response.getStatusLine();
-				if (isOkResponse(statusLine.getStatusCode())) {
-					return unmarshallEntity(response, responseType);
-				} else {
-					throw new UnexpectedResponseException(statusLine, readErrorFromResponse(response));
-				}
-			}
-		};
-	}
-
-	public static boolean isOkResponse(final int status) {
-		return status / 100 == 2;
-	}
-
-	public static <T> T unmarshallEntity(final HttpResponse response, final Class<T> returnType) {
-		final StatusLine statusLine = response.getStatusLine();
-		try {
-			final byte[] body = EntityUtils.toByteArray(response.getEntity());
-			if (body.length == 0) {
-				throw new UnexpectedResponseException(statusLine, ErrorCode.NO_ENTITY, "Message body is empty");
-			}
-			if (LOG.isTraceEnabled()) {
-				LOG.trace(new String(body, UTF_8));
-			}
-			try {
-				return JAXB.unmarshal(new ByteArrayInputStream(body), returnType);
-			} catch (IllegalStateException | DataBindingException e) {
-				throw new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, new String(body, UTF_8), e);
-			}
-		} catch (IOException e) {
-			throw new UnexpectedResponseException(statusLine, ErrorCode.IO_EXCEPTION, e.getMessage(), e);
-		}
-	}
-
-	public static Error readErrorFromResponse(final HttpResponse response) {
-		return unmarshallEntity(response, Error.class);
+	private <T> ResponseHandler<T> singleJaxbEntityHandler(Class<T> responseType) {
+		return response -> mapOkResponseOrThrowException(response, r -> unmarshallEntity(r, responseType));
 	}
 
 	public static class Builder {
@@ -283,9 +220,9 @@ public class DigipostUserAgreementsClient {
 		private final BrokerId brokerId;
 		private final InputStream certificateP12File;
 		private final String certificatePassword;
+		private final Optional<PrivateKey> privateKey;
 		private HttpClientBuilder httpClientBuilder;
-		private HttpHost proxyHost;
-		private PrivateKey privateKey;
+		private Optional<HttpHost> proxyHost = Optional.empty();
 
 		public Builder(final BrokerId brokerId, InputStream certificateP12File, String certificatePassword){
 			this(brokerId, certificateP12File, certificatePassword, null);
@@ -302,13 +239,13 @@ public class DigipostUserAgreementsClient {
 			}
 			this.certificateP12File = certificateP12File;
 			this.certificatePassword = certificatePassword;
-			this.privateKey = privateKey;
+			this.privateKey = Optional.ofNullable(privateKey);
 			serviceEndpoint(PRODUCTION_ENDPOINT);
 			httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
 		}
 
 		public Builder useProxy(final HttpHost proxyHost) {
-			this.proxyHost = proxyHost;
+			this.proxyHost = Optional.ofNullable(proxyHost);
 			return this;
 		}
 
@@ -329,15 +266,10 @@ public class DigipostUserAgreementsClient {
 			SSLContextBuilder sslContextBuilder= new SSLContextBuilder();
 			try {
 				sslContextBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build(), new HostnameVerifier() {
-					@Override
-					public boolean verify(String s, SSLSession sslSession) {
-						return true;
-					}
-				});
+				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build(), (hostname, session) -> true);
 				httpClientBuilder.setSSLSocketFactory(sslConnectionSocketFactory);
 			} catch (Exception e) {
-				throw new RuntimeException("Could not disable certificate verification: " + e);
+				throw new RuntimeException("Could not disable certificate verification: " + e.getMessage(), e);
 			}
 			System.err.println("Not checking validity of certificates for any hostnames");
 			return this;
@@ -345,31 +277,15 @@ public class DigipostUserAgreementsClient {
 
 		public DigipostUserAgreementsClient build() {
 			CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
-			final ApiServiceProvider apiServiceProvider = new ApiServiceProvider();
-			final ResponseSignatureInterceptor responseSignatureInterceptor = new ResponseSignatureInterceptor(new Supplier<byte[]>() {
-				@Override
-				public byte[] get() {
-					return apiServiceProvider.getApiService().getEntryPoint().getCertificate().getBytes();
-				}
-			});
 
 			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor());
 			httpClientBuilder.addInterceptorLast(new RequestUserAgentInterceptor());
-			if (privateKey == null) {
-				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new PrivateKeySigner(certificateP12File, certificatePassword), new RequestContentSHA256Filter()));
-			} else {
-				httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(new PrivateKeySigner(privateKey), new RequestContentSHA256Filter()));
-			}
+			PrivateKeySigner pkSigner = privateKey.map(PrivateKeySigner::new).orElseGet(() -> new PrivateKeySigner(certificateP12File, certificatePassword));
+			httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(pkSigner, new RequestContentSHA256Filter()));
 			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor());
-			httpClientBuilder.addInterceptorLast(new ResponseContentSHA256Interceptor());
-			httpClientBuilder.addInterceptorLast(responseSignatureInterceptor);
+			proxyHost.ifPresent(httpClientBuilder::setProxy);
 
-			if (proxyHost != null) {
-				httpClientBuilder.setProxy(proxyHost);
-			}
-
-			final ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());
-			apiServiceProvider.setApiService(apiService);
+			ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());
 			return new DigipostUserAgreementsClient(apiService);
 		}
 	}

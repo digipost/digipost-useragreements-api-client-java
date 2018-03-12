@@ -15,32 +15,22 @@
  */
 package no.digipost.api.useragreements.client;
 
+import java.util.function.Function;
+
 /**
- * User id represented by personal identification number
+ * A user id string. May be e.g. a personal identification number (Norwegian national ID number),
+ * or a bank account number.
  */
-public class UserId extends JustAValid<String> {
+public class UserId extends JustA<String> {
 
 	public static final String QUERY_PARAM_NAME = "user-id";
 
-	public UserId(final String personalIdentificationNumber) {
-		super(personalIdentificationNumber, "Personal Identification Number must be an 11-digit string");
+	public static UserId of(String userIdString) {
+		return new UserId(userIdString);
 	}
 
-	public boolean isValid(String personalIdentificationNumber) {
-		return personalIdentificationNumber != null && personalIdentificationNumber.length() == 11;
-	}
-
-	public String serialize() {
-		return this.value;
-	}
-
-	@Deprecated
-	public String getFnr() {
-		return getPersonalIdentificationNumber();
-	}
-
-	public String getPersonalIdentificationNumber() {
-		return this.value;
+	private UserId(String userIdString) {
+		super(userIdString, Function.identity());
 	}
 
 }

@@ -18,9 +18,8 @@ package no.digipost.api.useragreements.client;
 import no.digipost.cache.inmemory.SingleCached;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -36,20 +35,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import static no.digipost.api.useragreements.client.Headers.X_Digipost_UserId;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntities;
+import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntity;
 import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
-import static org.apache.http.HttpStatus.SC_OK;
 import static org.joda.time.Duration.standardMinutes;
 
 public class ApiService {
 
 	public static final String DIGIPOST_MEDIA_TYPE_USERS_V1 = "application/vnd.digipost.user-v1+xml";
-	private static final String ROOT = "/";
-	private static final String USER_DOCUMENTS_PATH = "/user-documents";
-	private static final String USER_AGREEMENTS_PATH = "/user-agreements";
+	private static final String USER_DOCUMENTS_PATH = "user-documents";
+	private static final String USER_AGREEMENTS_PATH = "user-agreements";
 
 	private final URI serviceEndpoint;
 	private final BrokerId brokerId;
@@ -62,72 +62,59 @@ public class ApiService {
 	}
 
 	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId, final ResponseHandler<IdentificationResult> handler) {
-		HttpPost httpPost = prepareHttpPost(getEntryPoint().getIdentificationUri().getPath());
-		httpPost.setEntity(marshallJaxbEntity(new Identification(userId)));
-		addRequestTrackingHeader(httpPost, requestTrackingId);
-		return executeHttpRequest(httpPost, handler);
+		return executeHttpRequest(newPostRequest(getEntryPoint().getIdentificationUri(), requestTrackingId, new Identification(userId.serialize())), handler);
 	}
 
 	public void createAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId, final ResponseHandler<Void> handler) {
-		HttpPost httpPost = prepareHttpPost(userAgreementsPath(senderId));
-		httpPost.setEntity(marshallJaxbEntity(agreement));
-		addRequestTrackingHeader(httpPost, requestTrackingId);
-		executeHttpRequest(httpPost, handler);
-	}
-
-	private String userAgreementsPath(final SenderId senderId) {
-		return prependSenderIdToPath(senderId, USER_AGREEMENTS_PATH);
-	}
-
-	private String userDocumentsPath(final SenderId senderId) {
-		return prependSenderIdToPath(senderId, USER_DOCUMENTS_PATH);
-	}
-
-	private String prependSenderIdToPath(final SenderId senderId, final String path) {
-		return ROOT + senderId.getId() + path;
+		executeHttpRequest(newPostRequest(new URIBuilder(serviceEndpoint).setPath(userAgreementsPath(senderId)), requestTrackingId, agreement), handler);
 	}
 
 	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<GetAgreementResult> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
-				.setParameter("user-id", userId.getPersonalIdentificationNumber())
+				.setParameter("user-id", userId.serialize())
 				.setParameter("agreement-type", agreementType.getType());
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
+		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
 	public Agreements getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId, final ResponseHandler<Agreements> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
-				.setParameter("user-id", userId.getPersonalIdentificationNumber());
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
+				.setParameter("user-id", userId.serialize());
+		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
+	}
+
+	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType, final String requestTrackingId) {
+		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
+				.setPath(userAgreementsPath(senderId))
+				.setParameter("agreement-type", agreementType.getType());
+		HttpGet request = newGetRequest(uriBuilder, requestTrackingId);
+		request.setHeader(X_Digipost_UserId, brokerId.serialize());
+		CloseableHttpResponse response;
+		try {
+			response = httpClient.execute(request);
+			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, Agreements.class).flatMap(a -> a.getAgreements().stream()));
+		} catch (IOException e) {
+			throw new RuntimeIOException(e.getMessage(), e);
+		}
 	}
 
 	public void deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<Void> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
-				.setParameter("user-id", userId.getPersonalIdentificationNumber())
+				.setParameter("user-id", userId.serialize())
 				.setParameter("agreement-type", agreementType.getType());
-		HttpDelete httpDelete = new HttpDelete(buildUri(uriBuilder));
-		addRequestTrackingHeader(httpDelete, requestTrackingId);
-		executeHttpRequest(httpDelete, handler);
+		HttpDelete deleteAgreementRequest = new HttpDelete(buildUri(uriBuilder));
+		executeHttpRequest(withRequestTrackingHeader(deleteAgreementRequest, requestTrackingId), handler);
 	}
 
 	public Documents getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<Documents> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId))
-				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
+				.setParameter(UserId.QUERY_PARAM_NAME, userId.serialize())
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		setGetDocumentsQueryParams(uriBuilder, query);
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
+		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
 	private void setGetDocumentsQueryParams(final URIBuilder uriBuilder, final GetDocumentsQuery query) {
@@ -152,44 +139,30 @@ public class ApiService {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId)
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
+		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
 	public void updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoiceUpdate invoice, final String requestTrackingId, final ResponseHandler<Void> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/invoice")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		HttpPost httpPost = new HttpPost(buildUri(uriBuilder));
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpPost, requestTrackingId);
-		httpPost.setEntity(marshallJaxbEntity(invoice));
-		executeHttpRequest(httpPost, handler);
+		executeHttpRequest(newPostRequest(uriBuilder, requestTrackingId, invoice), handler);
 	}
 
 	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<DocumentCount> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/count")
-				.setParameter(UserId.QUERY_PARAM_NAME, userId.getPersonalIdentificationNumber())
+				.setParameter(UserId.QUERY_PARAM_NAME, userId.serialize())
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		setGetDocumentsQueryParams(uriBuilder, query);
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
+		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
 	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId, final ResponseHandler<DocumentContent> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/content")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
+		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
 	public AgreementUsers getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId, final ResponseHandler<AgreementUsers> handler) {
@@ -201,10 +174,16 @@ public class ApiService {
 				.setParameter("invoice-sms-notification", smsNotificationsEnabled.toString());
 		}
 
-		HttpGet httpGet = new HttpGet(buildUri(uriBuilder));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		addRequestTrackingHeader(httpGet, requestTrackingId);
-		return executeHttpRequest(httpGet, handler);
+		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
+	}
+
+
+	private static String userAgreementsPath(final SenderId senderId) {
+		return senderId.serialize() + "/" + USER_AGREEMENTS_PATH;
+	}
+
+	private static String userDocumentsPath(final SenderId senderId) {
+		return senderId.serialize() + "/" + USER_DOCUMENTS_PATH;
 	}
 
 	private <T> T executeHttpRequest(final HttpRequestBase request, final ResponseHandler<T> handler) {
@@ -212,26 +191,50 @@ public class ApiService {
 			request.setHeader(X_Digipost_UserId, brokerId.serialize());
 			return httpClient.execute(request, handler);
 		} catch (IOException e) {
-			throw new RuntimeIOException(e);
+			throw RuntimeIOException.from(e);
 		}
 	}
 
-	private URI buildUri(URIBuilder builder) {
+	private HttpGet newGetRequest(final URIBuilder uriBuilder, String requestTrackingId) {
+		return newGetRequest(buildUri(uriBuilder), requestTrackingId);
+	}
+
+	private HttpGet newGetRequest(final URI uri, String requestTrackingId) {
+		return withCommonHeaders(new HttpGet(uri), requestTrackingId);
+	}
+
+	private HttpPost newPostRequest(final URIBuilder uriBuilder, String requestTrackingId, Object postBodyEntity) {
+		return newPostRequest(buildUri(uriBuilder), requestTrackingId, postBodyEntity);
+	}
+
+	private HttpPost newPostRequest(final URI uri, String requestTrackingId, Object postBodyEntity) {
+		HttpPost request = withCommonHeaders(new HttpPost(uri), requestTrackingId);
+		request.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		request.setEntity(marshallJaxbEntity(postBodyEntity));
+		return request;
+	}
+
+	private static URI buildUri(URIBuilder builder) {
 		try {
 			return builder.build();
 		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
-	private HttpPost prepareHttpPost(final String path) {
-		HttpPost httpPost = new HttpPost(serviceEndpoint.resolve(path));
-		httpPost.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		return httpPost;
+	private static <REQ extends HttpRequestBase> REQ withCommonHeaders(REQ request, String requestTrackingId) {
+		request.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		return withRequestTrackingHeader(request, requestTrackingId);
 	}
 
-	private HttpEntity marshallJaxbEntity(final Object obj) {
+	private static <REQ extends HttpRequestBase> REQ withRequestTrackingHeader(REQ request, final String requestTrackingId) {
+		if (requestTrackingId != null && !requestTrackingId.isEmpty()) {
+			request.setHeader("X-Digipost-Request-Id", requestTrackingId);
+		}
+		return request;
+	}
+
+	private static HttpEntity marshallJaxbEntity(final Object obj) {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream(1024);
 		JAXB.marshal(obj, bao);
 		return new ByteArrayEntity(bao.toByteArray());
@@ -249,35 +252,13 @@ public class ApiService {
 		}
 	}
 
-	private HttpRequestBase addRequestTrackingHeader(HttpRequestBase request, final String requestTrackingId) {
-		if (requestTrackingId != null && requestTrackingId.length() > 0) {
-			request.setHeader("X-Digipost-Request-Id", requestTrackingId);
-		}
-		return request;
-	}
 
 	private EntryPoint performGetEntryPoint() {
-		HttpGet httpGet = new HttpGet(serviceEndpoint.resolve(ROOT));
-		httpGet.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
-		return executeHttpRequest(httpGet, new ResponseHandler<EntryPoint>() {
-			@Override
-			public EntryPoint handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
-				if (response.getStatusLine().getStatusCode() == SC_OK) {
-					return DigipostUserAgreementsClient.unmarshallEntity(response, EntryPoint.class);
-				} else {
-					Error error = DigipostUserAgreementsClient.readErrorFromResponse(response);
-					throw new UnexpectedResponseException(response.getStatusLine(), error);
-				}
-			}
-		});
+		return executeHttpRequest(newGetRequest(serviceEndpoint, null),
+				response -> mapOkResponseOrThrowException(response, r -> unmarshallEntity(r, EntryPoint.class)));
 	}
 
-	private final Callable<EntryPoint> entryPoint = new Callable<EntryPoint>() {
-		@Override
-		public EntryPoint call() {
-			return performGetEntryPoint();
-		}
-	};
 
-	private final SingleCached<EntryPoint> cachedEntryPoint = new SingleCached<>("digipost-entrypoint", entryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
+	private final SingleCached<EntryPoint> cachedEntryPoint =
+			new SingleCached<>("digipost-entrypoint", this::performGetEntryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
 }

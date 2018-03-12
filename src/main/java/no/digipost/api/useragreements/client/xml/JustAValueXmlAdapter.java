@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.security;
+package no.digipost.api.useragreements.client.xml;
 
-import java.util.SortedMap;
+import no.digipost.api.useragreements.client.JustA;
 
-public interface ResponseToVerify {
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-	int getStatus();
+public abstract class JustAValueXmlAdapter<T extends JustA<String>> extends XmlAdapter<String,T> {
 
-	SortedMap<String, String> getHeaders();
+        @Override
+        public abstract T unmarshal(final String value);
 
-	String getPath();
-
+        @Override
+        public String marshal(final T item) {
+                return item.serialize();
+        }
 }

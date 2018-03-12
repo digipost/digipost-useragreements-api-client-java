@@ -27,14 +27,22 @@ public class DateUtils {
 	private static final DateTimeFormatter fmt = DateTimeFormat.forPattern(RFC_1123_DATE_FORMAT).withZone(FixedDateTimeZone.forID("GMT")).withLocale(Locale.ENGLISH);
 
 	/**
-	 * Returns an RFC 1123 date format used in HTTP
+	 * Format a {@code DateTime} as RFC 1123 date format used in HTTP.
+	 * The format is {@value #RFC_1123_DATE_FORMAT}.
+	 *
+	 * @param dateTime The {@code DateTime} to format.
+	 * @return the dateTime formatted as RFC 1123 compliant string
 	 */
 	public static String formatDate(DateTime dateTime) {
 		return fmt.print(dateTime);
 	}
 
 	/**
-	 * Return an DateTime parsed from an RFC 1123 compliant string
+	 * Return an {@code DateTime} parsed from an RFC 1123 compliant string, i.e.
+	 * having the format {@value #RFC_1123_DATE_FORMAT}.
+	 *
+	 * @param dateTime the RFC 1123 compliant string to parse.
+	 * @return the parsed {@code DateTime}
 	 */
 	public static DateTime parseDate(String dateTime) {
 		return fmt.parseDateTime(dateTime);

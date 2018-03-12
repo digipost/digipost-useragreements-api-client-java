@@ -15,6 +15,9 @@
  */
 package no.digipost.api.useragreements.client;
 
-public interface IsEqual<T> {
-	boolean isEqual(T that);
+final class PersonalIdentificationNumber {
+
+	static String mask(String personalIdentificationNumber) {
+		return personalIdentificationNumber != null ? personalIdentificationNumber.substring(0, Math.min(6, personalIdentificationNumber.length())) + "*****" : "null";
+	}
 }

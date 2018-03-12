@@ -17,8 +17,6 @@ package no.digipost.api.useragreements.client.filters.request;
 
 import com.google.common.io.ByteStreams;
 import no.digipost.api.useragreements.client.Headers;
-import no.digipost.api.useragreements.client.security.ClientRequestToSign;
-import no.digipost.api.useragreements.client.security.RequestMessageSignatureUtil;
 import no.digipost.api.useragreements.client.security.Signer;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -38,13 +36,17 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 	private final Signer signer;
 	private final RequestContentHashFilter hashFilter;
 
+	public RequestSignatureInterceptor(final Signer signer) {
+		this(signer, new RequestContentSHA256Filter());
+	}
+
 	public RequestSignatureInterceptor(final Signer signer, final RequestContentHashFilter hashFilter){
 		this.signer = signer;
 		this.hashFilter = hashFilter;
 	}
 
 	private void setSignatureHeader(final HttpRequest httpRequest) {
-		String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new ClientRequestToSign(httpRequest));
+		String stringToSign = RequestMessageSignatureUtil.getCanonicalRequestRepresentation(new RequestToSign(httpRequest));
 		log.debug("String to sign:\n===START SIGNATURSTRENG===\n" + stringToSign
 				+ "===SLUTT SIGNATURSTRENG===");
 

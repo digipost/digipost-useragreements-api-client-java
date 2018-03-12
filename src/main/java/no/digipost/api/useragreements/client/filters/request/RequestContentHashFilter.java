@@ -15,36 +15,35 @@
  */
 package no.digipost.api.useragreements.client.filters.request;
 
-import no.digipost.api.useragreements.client.ErrorCode;
-import no.digipost.api.useragreements.client.UserAgreementsApiException;
 import org.apache.http.HttpRequest;
 import org.bouncycastle.crypto.ExtendedDigest;
-import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Base64;
+import java.util.function.Supplier;
 
 public abstract class RequestContentHashFilter {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
-	private final Class<? extends ExtendedDigest> digestClass;
-	private final String header;
 
-	public RequestContentHashFilter(final Class<? extends ExtendedDigest> digestClass, final String header) {
-		this.digestClass = digestClass;
+	private final Supplier<? extends ExtendedDigest> digestSupplier;
+	private final String header;
+	private final Base64.Encoder base64Encoder;
+
+	public RequestContentHashFilter(final Supplier<? extends ExtendedDigest> digestSupplier, final String header) {
+		this.digestSupplier = digestSupplier;
 		this.header = header;
+		this.base64Encoder = Base64.getEncoder();
 	}
 
 	public void settContentHashHeader(final byte[] data, final HttpRequest httpRequest) {
-		try {
-			ExtendedDigest instance = digestClass.newInstance();
-			byte[] result = new byte[instance.getDigestSize()];
-			instance.update(data, 0, data.length);
-			instance.doFinal(result, 0);
-			String hash = new String(Base64.encode(result));
-			httpRequest.setHeader(header, hash);
-			log.debug(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new UserAgreementsApiException(ErrorCode.CLIENT_TECHNICAL_ERROR, "Feil ved generering av " + header, e);
-		}
+		ExtendedDigest instance = digestSupplier.get();
+		byte[] result = new byte[instance.getDigestSize()];
+		instance.update(data, 0, data.length);
+		instance.doFinal(result, 0);
+		String hash = base64Encoder.encodeToString(result);
+		httpRequest.setHeader(header, hash);
+		log.debug(RequestContentHashFilter.class.getSimpleName() + " satt headeren " + header + "=" + hash);
 	}
 }

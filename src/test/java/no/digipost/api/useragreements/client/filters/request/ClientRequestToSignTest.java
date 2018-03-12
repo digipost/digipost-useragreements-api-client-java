@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.security;
+package no.digipost.api.useragreements.client.filters.request;
 
 
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -25,20 +26,20 @@ public class ClientRequestToSignTest {
 
 	@Test
 	public void testStandardQuery(){
-		String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?query=1&query=2");
+		String s = RequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?query=1&query=2");
 		assertThat(s, is("query=1&query=2"));
 	}
 
 	@Test
 	public void testStandardNonQuery(){
-		String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com");
-		assertThat(s, is(""));
+		String s = RequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com");
+		assertThat(s, emptyString());
 	}
 
 	@Test
 	public void testNonStandardNonQuery(){
-		String s = ClientRequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?");
-		assertThat(s, is(""));
+		String s = RequestToSign.queryParametersFromURI("http://www.idontknowwhatifeel.com?");
+		assertThat(s, emptyString());
 	}
 
 }

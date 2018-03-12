@@ -17,9 +17,9 @@ package no.digipost.api.useragreements.client.xml;
 
 import no.digipost.api.useragreements.client.Kid;
 
-public class KidXmlAdapter extends JustAValidXmlAdapter<Kid> {
+public class KidXmlAdapter extends JustAValueXmlAdapter<Kid> {
     @Override
     public Kid unmarshal(String value) {
-        return new Kid(value);
+        return Kid.of(value);
     }
 }

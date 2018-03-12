@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.security;
+package no.digipost.api.useragreements.client.filters.request;
 
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;
@@ -23,20 +23,20 @@ import java.net.URISyntaxException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class ClientRequestToSign implements RequestToSign {
+final class RequestToSign {
 
 	private final HttpRequest clientRequest;
 
-	public ClientRequestToSign(final HttpRequest httpRequest) {
+	public RequestToSign(final HttpRequest httpRequest) {
 		this.clientRequest = httpRequest;
 	}
 
-	@Override
+
 	public String getMethod() {
 		return clientRequest.getRequestLine().getMethod();
 	}
 
-	@Override
+
 	public SortedMap<String, String> getHeaders() {
 		TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
 		Header[] headers = clientRequest.getAllHeaders();
@@ -46,7 +46,7 @@ public class ClientRequestToSign implements RequestToSign {
 		return sortedHeaders;
 	}
 
-	@Override
+
 	public String getPath() {
 		try {
 			String path = new URI(clientRequest.getRequestLine().getUri()).getPath();
@@ -56,7 +56,7 @@ public class ClientRequestToSign implements RequestToSign {
 		}
 	}
 
-	@Override
+
 	public String getParameters() {
 		return queryParametersFromURI(clientRequest.getRequestLine().getUri());
 	}

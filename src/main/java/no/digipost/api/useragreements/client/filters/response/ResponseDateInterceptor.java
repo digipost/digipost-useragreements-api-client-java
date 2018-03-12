@@ -42,7 +42,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 		if (isNotBlank(dateHeader)) {
 			sjekkDato(dateHeader, response);
 		} else {
-			throw new ServerSignatureException(response.getStatusLine(), "Respons mangler Date-header - server-signatur kunne ikke sjekkes");
+			throw new ServerSignatureException(response.getStatusLine(), "Respons mangler Date-header");
 		}
 	}
 
@@ -52,7 +52,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 			sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date, response);
 			sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date, response);
 		} catch (IllegalArgumentException e) {
-			throw new ServerSignatureException(response.getStatusLine(), "Date-header kunne ikke parses - server-signatur kunne ikke sjekkes");
+			throw new ServerSignatureException(response.getStatusLine(), "Date-header kunne ikke parses: " + e.getMessage(), e);
 		}
 	}
 

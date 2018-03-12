@@ -15,7 +15,6 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.util.Supplier;
 import org.junit.Test;
 
 import java.util.NoSuchElementException;
@@ -34,11 +33,6 @@ public class ResultTest {
 
 	@Test(expected = UserAgreementsApiException.class)
 	public void failureShouldThrowCustomeExceptionOnGetValue() {
-		new Result.Failure<>("Failure", new Supplier<RuntimeException>() {
-			@Override
-			public RuntimeException get() {
-				return new UserAgreementsApiException(ErrorCode.GENERAL_ERROR, "Custom exception");
-			}
-		}).getValue();
+		new Result.Failure<>("Failure", () -> new UserAgreementsApiException(ErrorCode.GENERAL_ERROR, "Custom exception")).getValue();
 	}
 }

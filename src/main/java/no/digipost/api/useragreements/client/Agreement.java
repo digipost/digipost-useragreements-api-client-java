@@ -23,6 +23,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import java.util.HashMap;
 
 @XmlRootElement
@@ -44,7 +45,7 @@ public class Agreement {
 
 	public Agreement(final AgreementType type, final UserId userId, final HashMap<String, String> attributes) {
 		this.type = type;
-		this.userId = userId.getPersonalIdentificationNumber();
+		this.userId = userId.serialize();
 		this.attributes = attributes == null ? new HashMap<String, String>() : attributes;
 	}
 
@@ -59,7 +60,7 @@ public class Agreement {
 	}
 
 	public UserId getUserId() {
-		return new UserId(userId);
+		return UserId.of(userId);
 	}
 
 	public HashMap<String, String> getAttributes() {
