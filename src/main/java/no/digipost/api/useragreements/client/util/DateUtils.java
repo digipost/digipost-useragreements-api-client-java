@@ -1,4 +1,3 @@
-package no.digipost.api.useragreements.client.util;
 /**
  * Copyright (C) Posten Norge AS
  *
@@ -14,38 +13,37 @@ package no.digipost.api.useragreements.client.util;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.tz.FixedDateTimeZone;
+package no.digipost.api.useragreements.client.util;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
-import java.util.Locale;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 public class DateUtils {
 
-	public static final String RFC_1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
-	private static final DateTimeFormatter fmt = DateTimeFormat.forPattern(RFC_1123_DATE_FORMAT).withZone(FixedDateTimeZone.forID("GMT")).withLocale(Locale.ENGLISH);
+	public static final ZoneId GMT = ZoneId.of("GMT");
 
 	/**
-	 * Format a {@code DateTime} as RFC 1123 date format used in HTTP.
-	 * The format is {@value #RFC_1123_DATE_FORMAT}.
+	 * Format a {@code ZonedDateTime} as RFC 1123 date format used in HTTP.
+	 * The format is {@link DateTimeFormatter#RFC_1123_DATE_TIME}.
 	 *
-	 * @param dateTime The {@code DateTime} to format.
+	 * @param dateTime The {@code ZonedDateTime} to format.
 	 * @return the dateTime formatted as RFC 1123 compliant string
 	 */
-	public static String formatDate(DateTime dateTime) {
-		return fmt.print(dateTime);
+	public static String formatDate(ZonedDateTime dateTime) {
+		return RFC_1123_DATE_TIME.format(dateTime.withZoneSameInstant(GMT));
 	}
 
 	/**
-	 * Return an {@code DateTime} parsed from an RFC 1123 compliant string, i.e.
-	 * having the format {@value #RFC_1123_DATE_FORMAT}.
+	 * Return an {@code ZonedDateTime} parsed from an RFC 1123 compliant string, i.e.
+	 * having the format {@link DateTimeFormatter#RFC_1123_DATE_TIME}.
 	 *
 	 * @param dateTime the RFC 1123 compliant string to parse.
-	 * @return the parsed {@code DateTime}
+	 * @return the parsed {@code ZonedDateTime}
 	 */
-	public static DateTime parseDate(String dateTime) {
-		return fmt.parseDateTime(dateTime);
+	public static ZonedDateTime parseDate(String dateTime) {
+		return RFC_1123_DATE_TIME.parse(dateTime, ZonedDateTime::from);
 	}
 
 }

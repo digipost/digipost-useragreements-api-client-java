@@ -16,11 +16,13 @@
 package no.digipost.api.useragreements.client.util;
 
 import io.vavr.test.Arbitrary;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import static io.vavr.test.Property.def;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static no.digipost.api.useragreements.client.util.DateUtils.formatDate;
 import static no.digipost.api.useragreements.client.util.DateUtils.parseDate;
 import static org.hamcrest.Matchers.is;
@@ -30,15 +32,15 @@ public class DateUtilsTest {
 
 	@Test
 	public void formatsAsRFC_1123() {
-		DateTime flightToJapan = new DateTime(2018, 3, 26, 13, 30, DateTimeZone.forID("Europe/Oslo"));
+		ZonedDateTime flightToJapan = ZonedDateTime.of(2018, 3, 26, 13, 30, 4, 0, ZoneId.of("Europe/Oslo"));
 		String rfc1123Formatted = DateUtils.formatDate(flightToJapan);
-		assertThat(rfc1123Formatted, is("Mon, 26 Mar 2018 11:30:00 GMT"));
+		assertThat(rfc1123Formatted, is("Mon, 26 Mar 2018 11:30:04 GMT"));
 	}
 
 	@Test
 	public void convertsBackAndForth() {
 		def("formats as RFC 1123 and converts back to datetime instance")
-			.forAll(Arbitrary.integer().map(epochMillis -> new DateTime((long) epochMillis).withMillisOfSecond(0)))
+			.forAll(Arbitrary.localDateTime().map(dateTime -> dateTime.atZone(ZoneId.of("Europe/Oslo")).truncatedTo(SECONDS)))
 			.suchThat(dateTime -> dateTime.isEqual(parseDate(formatDate(dateTime))))
 			.check()
 			.assertIsSatisfied();

@@ -22,32 +22,29 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 
+import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.joda.time.DateTimeZone.UTC;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ResponseDateInterceptorTest {
-
-	private ResponseDateInterceptor responseDateInterceptor;
 
 	@Rule
 	public final MockitoRule mockito = MockitoJUnit.rule();
+
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
 
 	@Mock
 	private HttpContext httpContextMock;
@@ -57,64 +54,42 @@ public class ResponseDateInterceptorTest {
 
 	@Before
 	public void setUp() {
-		responseDateInterceptor = new ResponseDateInterceptor();
 		when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
 	}
 
 	@Test
 	public void skal_kaste_exception_når_Date_header_mangler() throws IOException, HttpException {
-		try {
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle ha kastet feil grunnet manglende Date-header");
-		} catch (ServerSignatureException e) {
-			assertThat(e.getMessage(), containsString("Respons mangler Date-header"));
-		}
-	}
-
-	@Test
-	public void skal_kaste_custom_exception_når_Date_header_mangler() throws IOException, HttpException {
-		try {
-			ResponseDateInterceptor responseDateInterceptor = new ResponseDateInterceptor();
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle ha kastet feil grunnet manglende Date-header");
-		} catch (ServerSignatureException e) {
-			assertThat(e.getMessage(), containsString("Respons mangler Date-header"));
-		}
+		ResponseDateInterceptor interceptor = new ResponseDateInterceptor();
+		expectedException.expect(ServerSignatureException.class);
+		expectedException.expectMessage(containsString("Respons mangler Date-header"));
+		interceptor.process(httpResponseMock, httpContextMock);
 	}
 
 	@Test
 	public void skal_kaste_feil_når_Date_header_er_på_feil_format() throws IOException, HttpException {
+		ResponseDateInterceptor interceptor = new ResponseDateInterceptor();
 		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "16. januar 2012 - 16:14:23"));
-		try {
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle kastet feil grunnet feilaktig Date header format");
-		} catch (ServerSignatureException e) {
-			assertThat(e.getMessage(), containsString("Date-header kunne ikke parses"));
-		}
+		expectedException.expect(ServerSignatureException.class);
+		expectedException.expectMessage(containsString("Date-header kunne ikke parses"));
+		interceptor.process(httpResponseMock, httpContextMock);
 	}
 
 	@Test
 	public void skal_kaste_feil_når_Date_header_er_for_ny() throws IOException, HttpException {
-		DateTimeUtils.setCurrentMillisFixed(new DateTime(2014, 11, 4, 21, 00, 58, UTC).getMillis());
+		ResponseDateInterceptor interceptor = new ResponseDateInterceptor(Clock.fixed(ZonedDateTime.of(2014, 11, 4, 21, 00, 58, 0, UTC).toInstant(), UTC));
 		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
-		try {
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle kastet feil grunnet for ny Date header");
-		} catch (ServerSignatureException e) {
-			assertThat(e.getMessage(), containsString("Date-header fra server er for ny"));
-		}
+		expectedException.expect(ServerSignatureException.class);
+		expectedException.expectMessage(containsString("Date-header fra server er for ny"));
+		interceptor.process(httpResponseMock, httpContextMock);
 	}
 
 	@Test
 	public void skal_kaste_feil_når_Date_header_er_for_gammel() throws IOException, HttpException {
-		DateTimeUtils.setCurrentMillisFixed(new DateTime(2014, 11, 4, 21, 20, 58, UTC).getMillis());
+		ResponseDateInterceptor interceptor = new ResponseDateInterceptor(Clock.fixed(ZonedDateTime.of(2014, 11, 4, 21, 20, 58, 0, UTC).toInstant(), UTC));
 		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
-		try {
-			responseDateInterceptor.process(httpResponseMock, httpContextMock);
-			fail("Skulle kastet feil grunnet for gammel Date header");
-		} catch (ServerSignatureException e) {
-			assertThat(e.getMessage(), containsString("Date-header fra server er for gammel"));
-		}
+		expectedException.expect(ServerSignatureException.class);
+		expectedException.expectMessage(containsString("Date-header fra server er for gammel"));
+		interceptor.process(httpResponseMock, httpContextMock);
 	}
 
 	public static class StatusLineMock implements StatusLine {

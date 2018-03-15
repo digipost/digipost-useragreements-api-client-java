@@ -21,15 +21,27 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.protocol.HttpContext;
-import org.joda.time.DateTime;
 
+import java.time.Clock;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+
+import static java.time.ZonedDateTime.now;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.http.HttpHeaders.DATE;
-import static org.joda.time.DateTime.now;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
 	private static final int AKSEPTABEL_TIDSDIFFERANSE_MINUTTER = 5;
+	private final Clock clock;
+
+	public ResponseDateInterceptor() {
+		this(Clock.systemDefaultZone());
+	}
+
+	public ResponseDateInterceptor(Clock clock) {
+		this.clock = clock;
+	}
 
 	@Override
 	public void process(HttpResponse response, HttpContext context) {
@@ -48,22 +60,22 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
 	private void sjekkDato(final String dateOnRFC1123Format, HttpResponse response) {
 		try {
-			DateTime date = DateUtils.parseDate(dateOnRFC1123Format);
+			ZonedDateTime date = DateUtils.parseDate(dateOnRFC1123Format);
 			sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date, response);
 			sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date, response);
-		} catch (IllegalArgumentException e) {
+		} catch (DateTimeParseException e) {
 			throw new ServerSignatureException(response.getStatusLine(), "Date-header kunne ikke parses: " + e.getMessage(), e);
 		}
 	}
 
-	private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final DateTime parsedDate, HttpResponse response) {
-		if (parsedDate.isBefore(now().minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
+	private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final ZonedDateTime parsedDate, HttpResponse response) {
+		if (parsedDate.isBefore(now(clock).minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
 			throw new ServerSignatureException(response.getStatusLine(), "Date-header fra server er for gammel: " + headerDate);
 		}
 	}
 
-	private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final DateTime parsedDate, HttpResponse response) {
-		if (parsedDate.isAfter(now().plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
+	private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final ZonedDateTime parsedDate, HttpResponse response) {
+		if (parsedDate.isAfter(now(clock).plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
 			throw new ServerSignatureException(response.getStatusLine(), "Date-header fra server er for ny: " + headerDate);
 		}
 	}
