@@ -193,15 +193,14 @@ public class DigipostUserAgreementsClient {
 		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(DocumentContent.class));
 	}
 
-	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
+	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
 		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null);
 	}
 
-	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
+	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, singleJaxbEntityHandler(AgreementUsers.class));
-		return agreementUsers.getUsers();
+		return apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId);
 	}
 
 	private ResponseHandler<Void> voidOkHandler() {

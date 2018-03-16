@@ -166,7 +166,7 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public AgreementUsers getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId, final ResponseHandler<AgreementUsers> handler) {
+	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId) + "/agreement-users")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
@@ -175,7 +175,15 @@ public class ApiService {
 				.setParameter("invoice-sms-notification", smsNotificationsEnabled.toString());
 		}
 
-		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
+		HttpGet request = newGetRequest(uriBuilder, requestTrackingId);
+		request.setHeader(X_Digipost_UserId, brokerId.serialize());
+		CloseableHttpResponse response;
+		try {
+			response = httpClient.execute(request);
+			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementUsers.class).flatMap(a -> a.getUsers().stream()));
+		} catch (IOException e) {
+			throw new RuntimeIOException(e.getMessage(), e);
+		}
 	}
 
 
