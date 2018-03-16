@@ -15,6 +15,7 @@ This software includes third party software subject to the following licenses:
   Apache HttpCore under Apache License, Version 2.0
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
+  Caffeine cache under Apache License, Version 2.0
   Checker Qual under GNU General Public License, version 2 (GPL2), with the classpath exception or The MIT License
   Digipost Caching under The Apache Software License, Version 2.0
   Digipost HTTP Client Builder under The Apache Software License, Version 2.0
@@ -24,7 +25,5 @@ This software includes third party software subject to the following licenses:
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   J2ObjC Annotations under The Apache Software License, Version 2.0
   JCL 1.2 implemented over SLF4J under MIT License
-  Joda-Time under Apache 2
-  Motif under Apache License 2.0
   SLF4J API Module under MIT License
 

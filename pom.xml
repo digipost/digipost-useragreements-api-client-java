@@ -27,28 +27,27 @@
 	</parent>
 
 	<artifactId>digipost-useragreements-api-client-java</artifactId>
-
 	<version>2.0-beta-SNAPSHOT</version>
 
 	<name>Digipost User Agreements API Client</name>
 	<description>Java library for interacting with the Digipost UserAgreements API</description>
 
 	<properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 
-        <bouncycastle.version>1.54</bouncycastle.version>
+		<bouncycastle.version>1.54</bouncycastle.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<jaxb.version>2.2.7</jaxb.version>
 		<jsr173_api.version>1.0</jsr173_api.version>
 	</properties>
 
 	<dependencies>
-        <dependency>
-            <groupId>no.digipost</groupId>
-            <artifactId>cache</artifactId>
-            <version>1.3</version>
-        </dependency>
+		<dependency>
+			<groupId>no.digipost</groupId>
+			<artifactId>digipost-cache</artifactId>
+			<version>2.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -106,11 +105,6 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
 			<version>${bouncycastle.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>2.9.9</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -364,13 +358,11 @@
 										<include>org.apache.commons:commons-lang3</include>
 										<include>com.sun.xml.bind:jaxb-core:${jaxb.version}:jar:compile</include>
 										<include>com.sun.xml.bind:jaxb-impl:${jaxb.version}:jar:compile</include>
-										<include>org.joda:joda-convert</include>
-										<include>joda-time:joda-time</include>
 										<include>org.javassist:javassist:*:jar:test</include>
 										<include>org.slf4j:slf4j-api:*:jar:compile</include>
 										<include>org.slf4j:slf4j-simple:*:jar:test</include>
-										<include>no.digipost:cache</include>
-										<include>com.github.runeflobakk:motif</include>
+										<include>no.digipost:digipost-cache</include>
+										<include>com.github.ben-manes.caffeine:caffeine</include>
 										<include>com.google.guava:guava</include>
 										<include>com.google.code.findbugs:jsr305</include>
 										<include>com.google.j2objc:j2objc-annotations</include>
