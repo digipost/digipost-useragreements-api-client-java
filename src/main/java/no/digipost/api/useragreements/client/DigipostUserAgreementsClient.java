@@ -106,14 +106,6 @@ public class DigipostUserAgreementsClient {
 		});
 	}
 
-	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType) {
-		return getAgreementsOfType(senderId, agreementType, null);
-	}
-
-	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType, String requestTrackingId) {
-		return apiService.getAgreementsOfType(senderId, agreementType, requestTrackingId);
-	}
-
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId) {
 		return getAgreements(senderId, userId, null);
 	}
@@ -191,6 +183,10 @@ public class DigipostUserAgreementsClient {
 
 	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
 		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(DocumentContent.class));
+	}
+
+	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType) {
+		return getAgreementUsers(senderId, agreementType, null);
 	}
 
 	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {

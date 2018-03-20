@@ -85,21 +85,6 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType, final String requestTrackingId) {
-		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(userAgreementsPath(senderId))
-				.setParameter("agreement-type", agreementType.getType());
-		HttpGet request = newGetRequest(uriBuilder, requestTrackingId);
-		request.setHeader(X_Digipost_UserId, brokerId.serialize());
-		CloseableHttpResponse response;
-		try {
-			response = httpClient.execute(request);
-			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, Agreements.class).flatMap(a -> a.getAgreements().stream()));
-		} catch (IOException e) {
-			throw new RuntimeIOException(e.getMessage(), e);
-		}
-	}
-
 	public void deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<Void> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
