@@ -23,8 +23,8 @@ SenderId sender = SenderId.of(1234L);
 // The stream is made available immediately when the client starts receiving the response,
 // which is a rather long chunked http response. The processing of the stream should
 // continuously persist/update the received agreements.
-try (Stream<Agreement> accounts = client.getAgreementsOfType(sender, BANK_ACCOUNT_NUMBER_FOR_RECEIPTS)) {
-    accounts.forEach(account -> persistAccountNumber(account.getUserId().serialize()));
+try (Stream<UserId> accounts = client.getAgreementUsers(sender, BANK_ACCOUNT_NUMBER_FOR_RECEIPTS)) {
+    accounts.forEach(account -> persistAccountNumber(account.serialize()));
 }
 
 ...
