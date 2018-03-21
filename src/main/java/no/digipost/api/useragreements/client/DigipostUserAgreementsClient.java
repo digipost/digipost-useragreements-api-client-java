@@ -91,7 +91,7 @@ public class DigipostUserAgreementsClient {
 		return apiService.getAgreement(senderId, type, userId, requestTrackingId, response -> {
 			StatusLine status = response.getStatusLine();
 			if (isOkResponse(status.getStatusCode())) {
-				return new GetAgreementResult(unmarshallEntity(response, Agreements.class).getSingleAgreement());
+				return new GetAgreementResult(unmarshallEntity(response, Agreement.class));
 			} else {
 				final Error error = readErrorEntity(response);
 				if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
