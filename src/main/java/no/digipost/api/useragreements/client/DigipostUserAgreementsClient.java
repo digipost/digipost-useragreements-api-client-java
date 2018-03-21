@@ -91,7 +91,7 @@ public class DigipostUserAgreementsClient {
 		return apiService.getAgreement(senderId, type, userId, requestTrackingId, response -> {
 			StatusLine status = response.getStatusLine();
 			if (isOkResponse(status.getStatusCode())) {
-				return new GetAgreementResult(unmarshallEntity(response, Agreements.class).getSingleAgreement());
+				return new GetAgreementResult(unmarshallEntity(response, Agreement.class));
 			} else {
 				final Error error = readErrorEntity(response);
 				if (status.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
@@ -104,14 +104,6 @@ public class DigipostUserAgreementsClient {
 				throw new UnexpectedResponseException(status, error);
 			}
 		});
-	}
-
-	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType) {
-		return getAgreementsOfType(senderId, agreementType, null);
-	}
-
-	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType, String requestTrackingId) {
-		return apiService.getAgreementsOfType(senderId, agreementType, requestTrackingId);
 	}
 
 	public List<Agreement> getAgreements(final SenderId senderId, final UserId userId) {
@@ -193,15 +185,18 @@ public class DigipostUserAgreementsClient {
 		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(DocumentContent.class));
 	}
 
-	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
+	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType) {
+		return getAgreementUsers(senderId, agreementType, null);
+	}
+
+	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
 		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null);
 	}
 
-	public List<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
+	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		final AgreementUsers agreementUsers = apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId, singleJaxbEntityHandler(AgreementUsers.class));
-		return agreementUsers.getUsers();
+		return apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId);
 	}
 
 	private ResponseHandler<Void> voidOkHandler() {

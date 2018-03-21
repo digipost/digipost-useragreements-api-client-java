@@ -15,7 +15,7 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.cache.inmemory.SingleCached;
+import no.digipost.cache2.inmemory.SingleCached;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.ResponseHandler;
@@ -27,7 +27,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.joda.time.format.ISODateTimeFormat;
 
 import javax.xml.bind.JAXB;
 
@@ -37,13 +36,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.stream.Stream;
 
+import static java.time.Duration.ofMinutes;
+import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static no.digipost.api.useragreements.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
 import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntities;
 import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntity;
-import static no.digipost.cache.inmemory.CacheConfig.expireAfterAccess;
-import static no.digipost.cache.inmemory.CacheConfig.useSoftValues;
-import static org.joda.time.Duration.standardMinutes;
+import static no.digipost.cache2.inmemory.CacheConfig.expireAfterAccess;
+import static no.digipost.cache2.inmemory.CacheConfig.useSoftValues;
 
 public class ApiService {
 
@@ -84,21 +85,6 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public Stream<Agreement> getAgreementsOfType(final SenderId senderId, final AgreementType agreementType, final String requestTrackingId) {
-		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(userAgreementsPath(senderId))
-				.setParameter("agreement-type", agreementType.getType());
-		HttpGet request = newGetRequest(uriBuilder, requestTrackingId);
-		request.setHeader(X_Digipost_UserId, brokerId.serialize());
-		CloseableHttpResponse response;
-		try {
-			response = httpClient.execute(request);
-			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, Agreements.class).flatMap(a -> a.getAgreements().stream()));
-		} catch (IOException e) {
-			throw new RuntimeIOException(e.getMessage(), e);
-		}
-	}
-
 	public void deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<Void> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
@@ -122,16 +108,16 @@ public class ApiService {
 			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, query.getInvoiceStatus().getStatus());
 		}
 		if (query.getInvoiceDueDateFrom() != null) {
-			uriBuilder.setParameter("invoice-due-date-from", query.getInvoiceDueDateFrom().toString(ISODateTimeFormat.date()));
+			uriBuilder.setParameter("invoice-due-date-from", query.getInvoiceDueDateFrom().format(ISO_LOCAL_DATE));
 		}
 		if (query.getInvoiceDueDateTo() != null) {
-			uriBuilder.setParameter("invoice-due-date-to", query.getInvoiceDueDateTo().toString(ISODateTimeFormat.date()));
+			uriBuilder.setParameter("invoice-due-date-to", query.getInvoiceDueDateTo().format(ISO_LOCAL_DATE));
 		}
 		if (query.getDeliveryTimeFrom() != null) {
-			uriBuilder.setParameter("delivery-time-from", query.getDeliveryTimeFrom().toString(ISODateTimeFormat.dateTime()));
+			uriBuilder.setParameter("delivery-time-from", query.getDeliveryTimeFrom().format(ISO_DATE_TIME));
 		}
 		if (query.getDeliveryTimeTo() != null) {
-			uriBuilder.setParameter("delivery-time-to", query.getDeliveryTimeTo().toString(ISODateTimeFormat.dateTime()));
+			uriBuilder.setParameter("delivery-time-to", query.getDeliveryTimeTo().format(ISO_DATE_TIME));
 		}
 	}
 
@@ -165,7 +151,7 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public AgreementUsers getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId, final ResponseHandler<AgreementUsers> handler) {
+	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId) + "/agreement-users")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
@@ -174,7 +160,15 @@ public class ApiService {
 				.setParameter("invoice-sms-notification", smsNotificationsEnabled.toString());
 		}
 
-		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
+		HttpGet request = newGetRequest(uriBuilder, requestTrackingId);
+		request.setHeader(X_Digipost_UserId, brokerId.serialize());
+		CloseableHttpResponse response;
+		try {
+			response = httpClient.execute(request);
+			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementUsers.class).flatMap(a -> a.getUsers().stream()));
+		} catch (IOException e) {
+			throw new RuntimeIOException(e.getMessage(), e);
+		}
 	}
 
 
@@ -260,5 +254,5 @@ public class ApiService {
 
 
 	private final SingleCached<EntryPoint> cachedEntryPoint =
-			new SingleCached<>("digipost-entrypoint", this::performGetEntryPoint, expireAfterAccess(standardMinutes(5)), useSoftValues);
+			new SingleCached<>("digipost-entrypoint", this::performGetEntryPoint, expireAfterAccess(ofMinutes(5)), useSoftValues);
 }

@@ -16,15 +16,16 @@
 package no.digipost.api.useragreements.client;
 
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 
 public class GetDocumentsQuery {
 	private final InvoiceStatus invoiceStatus;
 	private final LocalDate invoiceDueDateFrom;
 	private final LocalDate invoiceDueDateTo;
-	private final DateTime deliveryTimeFrom;
-	private final DateTime deliveryTimeTo;
+	private final OffsetDateTime deliveryTimeFrom;
+	private final OffsetDateTime deliveryTimeTo;
 
 	private GetDocumentsQuery(final Builder builder) {
 		this.invoiceStatus = builder.invoiceStatus;
@@ -46,11 +47,11 @@ public class GetDocumentsQuery {
 		return invoiceDueDateTo;
 	}
 
-	public DateTime getDeliveryTimeFrom() {
+	public OffsetDateTime getDeliveryTimeFrom() {
 		return deliveryTimeFrom;
 	}
 
-	public DateTime getDeliveryTimeTo() {
+	public OffsetDateTime getDeliveryTimeTo() {
 		return deliveryTimeTo;
 	}
 
@@ -66,8 +67,8 @@ public class GetDocumentsQuery {
 		private InvoiceStatus invoiceStatus;
 		private LocalDate invoiceDueDateFrom;
 		private LocalDate invoiceDueDateTo;
-		private DateTime deliveryTimeFrom;
-		private DateTime deliveryTimeTo;
+		private OffsetDateTime deliveryTimeFrom;
+		private OffsetDateTime deliveryTimeTo;
 
 		private Builder() {}
 
@@ -86,14 +87,22 @@ public class GetDocumentsQuery {
 			return this;
 		}
 
-		public Builder deliveryTimeFrom(final DateTime deliveryTimeFrom) {
+		public Builder deliveryTimeFrom(final OffsetDateTime deliveryTimeFrom) {
 			this.deliveryTimeFrom = deliveryTimeFrom;
 			return this;
 		}
 
-		public Builder deliveryTimeTo(final DateTime deliveryTimeTo) {
+		public Builder deliveryTimeFrom(final ZonedDateTime deliveryTimeFrom) {
+			return deliveryTimeFrom(deliveryTimeFrom.toOffsetDateTime());
+		}
+
+		public Builder deliveryTimeTo(final OffsetDateTime deliveryTimeTo) {
 			this.deliveryTimeTo = deliveryTimeTo;
 			return this;
+		}
+
+		public Builder deliveryTimeTo(final ZonedDateTime deliveryTimeTo) {
+			return deliveryTimeTo(deliveryTimeTo.toOffsetDateTime());
 		}
 
 		public GetDocumentsQuery build() {

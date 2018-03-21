@@ -17,10 +17,10 @@ package no.digipost.api.useragreements.client;
 
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.joda.time.LocalDate;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 import static no.digipost.api.useragreements.client.AgreementType.INVOICE_BANK;
@@ -92,8 +92,8 @@ public class Examples {
 
 		final List<Document> allOptions = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.builder()
 				.invoiceStatus(InvoiceStatus.PAID)
-				.invoiceDueDateFrom(new LocalDate(2017, 1, 1))
-				.invoiceDueDateTo(new LocalDate(2017, 5, 1))
+				.invoiceDueDateFrom(LocalDate.of(2017, 1, 1))
+				.invoiceDueDateTo(LocalDate.of(2017, 5, 1))
 				.build());
 	}
 
