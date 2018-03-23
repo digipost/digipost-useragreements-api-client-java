@@ -10,6 +10,34 @@ For example, the agreement type INVOICE_BANK allows a sender to retrieve a user'
 
 [API specification](https://github.com/digipost/invoice-api-specification/blob/master/user-documents.md)
 
+### Download
+
+The library can be acquired from Maven Central Repository, using the dependency management tool of your choice.
+For Maven you can use the following dependency:
+
+```xml
+<dependency>
+    <groupId>no.digipost</groupId>
+    <artifactId>digipost-useragreements-api-client-java</artifactId>
+    <version>1.2</version>
+</dependency>
+```
+
+### Prerequisites
+
+The library requires *Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files for JDK/JRE* to be installed:
+[www.oracle.com/technetwork/java/javase/downloads/index.html](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+
+Starting from *Java 8 build 152* the unlimited strength cryptography policy files are bundled with the JDK/JRE, and may be enabled by setting
+the security property `security.policy` to `"unlimited"`. How this is set depends on how you deploy your application, but if done early enough,
+i.e. *before* the JCE framework is initialized, it can be set programatically like this:
+
+```java
+Security.setProperty("crypto.policy", "unlimited"); // only effective on Java 8 b152 or newer
+```
+
+More details are available in the [Java 8u152 Release Notes](http://www.oracle.com/technetwork/java/javase/8u152-relnotes-3850503.html#JDK-8157561).
+
 ### Instantiate and configure client
 
 ```java

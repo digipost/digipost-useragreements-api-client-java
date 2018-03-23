@@ -9,6 +9,35 @@ For instance, the user may permit that certain information may be provided to a 
 through an agreement. The agreement governs which documents the sender can access and what operations it can perform.
 
 
+### Download
+
+The library can be acquired from Maven Central Repository, using the dependency management tool of your choice.
+For Maven you can use the following dependency:
+
+```xml
+<dependency>
+    <groupId>no.digipost</groupId>
+    <artifactId>digipost-useragreements-api-client-java</artifactId>
+    <version>2.0-beta</version>
+</dependency>
+```
+
+### Prerequisites
+
+The library requires *Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files for JDK/JRE* to be installed:
+[www.oracle.com/technetwork/java/javase/downloads/index.html](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+
+Starting from *Java 8 build 152* the unlimited strength cryptography policy files are bundled with the JDK/JRE, and may be enabled by setting
+the security property `security.policy` to `"unlimited"`. How this is set depends on how you deploy your application, but if done early enough,
+i.e. *before* the JCE framework is initialized, it can be set programatically like this:
+
+```java
+Security.setProperty("crypto.policy", "unlimited"); // only effective on Java 8 b152 or newer
+```
+
+More details are available in the [Java 8u152 Release Notes](http://www.oracle.com/technetwork/java/javase/8u152-relnotes-3850503.html#JDK-8157561).
+
+
 ### Instantiate and configure client
 
 ```java
@@ -16,7 +45,7 @@ InputStream key = getClass().getResourceAsStream("certificate.p12");
 
 HttpHost proxy = new HttpHost("proxy.example.com", 8080, "http");
 
-final BrokerId brokerId = BrokerId.of(1234L);
+BrokerId brokerId = BrokerId.of(1234L);
 
 DigipostUserAgreementsClient client = new DigipostUserAgreementsClient
 		.Builder(brokerId, key, "password")
