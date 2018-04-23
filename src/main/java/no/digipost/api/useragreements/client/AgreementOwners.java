@@ -22,32 +22,46 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "agreement-users")
-public class AgreementUsers {
+@XmlRootElement(name = "agreement-owners")
+public class AgreementOwners {
 
 	@XmlElement(name = "user-id")
 	@XmlJavaTypeAdapter(UserIdXmlAdapter.class)
-	private List<UserId> users;
+	private List<UserId> ids;
 
-	private AgreementUsers() {}
+	@XmlElement
+	private Instant nextRequestAllowedAt;
 
-	public AgreementUsers(final List<UserId> users) {
-		this.users = users;
+	public AgreementOwners(final List<UserId> users) {
+		this.ids = users;
 	}
 
-	public List<UserId> getUsers() {
-		if (users == null) {
-			users = new ArrayList<>();
+	public List<UserId> getIds() {
+		if (ids == null) {
+			ids = new ArrayList<>();
 		}
-		return users;
+		return ids;
+	}
+
+	public Optional<Instant> getNextRequestAllowedAt() {
+		return Optional.ofNullable(nextRequestAllowedAt);
 	}
 
 	@Override
 	public String toString() {
-		return users.toString();
+		return ids.toString();
 	}
+
+
+	// Used by JAXB
+	@SuppressWarnings("unused")
+	private AgreementOwners() {}
+
 }

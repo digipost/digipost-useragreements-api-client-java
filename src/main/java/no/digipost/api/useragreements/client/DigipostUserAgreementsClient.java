@@ -185,18 +185,18 @@ public class DigipostUserAgreementsClient {
 		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(DocumentContent.class));
 	}
 
-	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType) {
-		return getAgreementUsers(senderId, agreementType, null);
+	public Stream<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType) {
+		return getAgreementOwners(senderId, agreementType, null);
 	}
 
-	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
-		return getAgreementUsers(senderId, agreementType, smsNotificationEnabled, null);
+	public Stream<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
+		return getAgreementOwners(senderId, agreementType, smsNotificationEnabled, null);
 	}
 
-	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
+	public Stream<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		return apiService.getAgreementUsers(senderId, agreementType, smsNotificationEnabled, requestTrackingId);
+		return apiService.getAgreementOwners(senderId, agreementType, smsNotificationEnabled, requestTrackingId);
 	}
 
 	private ResponseHandler<Void> voidOkHandler() {

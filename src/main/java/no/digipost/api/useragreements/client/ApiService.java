@@ -151,9 +151,9 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
+	public Stream<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(userAgreementsPath(senderId) + "/agreement-users")
+				.setPath(userAgreementsPath(senderId) + "/agreement-owners")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		if (smsNotificationsEnabled != null) {
 			uriBuilder
@@ -165,7 +165,7 @@ public class ApiService {
 		CloseableHttpResponse response;
 		try {
 			response = httpClient.execute(request);
-			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementUsers.class).flatMap(a -> a.getUsers().stream()));
+			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementOwners.class).flatMap(a -> a.getIds().stream()));
 		} catch (IOException e) {
 			throw new RuntimeIOException(e.getMessage(), e);
 		}
