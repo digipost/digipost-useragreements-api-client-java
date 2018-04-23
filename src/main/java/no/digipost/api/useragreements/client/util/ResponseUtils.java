@@ -17,7 +17,9 @@ package no.digipost.api.useragreements.client.util;
 
 import no.digipost.api.useragreements.client.Error;
 import no.digipost.api.useragreements.client.ErrorCode;
+import no.digipost.api.useragreements.client.Headers;
 import no.digipost.api.useragreements.client.RuntimeIOException;
+import no.digipost.api.useragreements.client.TooManyRequestsException;
 import no.digipost.api.useragreements.client.UnexpectedResponseException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -33,6 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Scanner;
@@ -41,6 +44,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Spliterator.IMMUTABLE;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.StreamSupport.stream;
@@ -58,6 +62,11 @@ public final class ResponseUtils {
 		final StatusLine statusLine = response.getStatusLine();
 		if (isOkResponse(statusLine.getStatusCode())) {
 			return okResponseMapper.apply(response);
+		} else if (statusLine.getStatusCode() == 429) { // Too Many Requests
+			Optional<Instant> nextAllowedRequest = Optional.ofNullable(response.getFirstHeader(Headers.Retry_After))
+				.flatMap(h -> Optional.ofNullable(h.getValue()))
+				.map(retryAfterValue -> RFC_1123_DATE_TIME.parse(retryAfterValue, Instant::from));
+			throw new TooManyRequestsException(nextAllowedRequest);
 		} else {
 			throw new UnexpectedResponseException(statusLine, readErrorEntity(response));
 		}

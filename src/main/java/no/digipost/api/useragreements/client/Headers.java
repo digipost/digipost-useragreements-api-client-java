@@ -41,4 +41,11 @@ public final class Headers {
 	 */
 	public static final String X_Content_SHA256 = "X-Content-SHA256";
 
+	/**
+	 * Retry-After
+	 *
+	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.37">RFC 2616 section 14.37</a>
+	 */
+	public static final String Retry_After = "Retry-After";
+
 }
