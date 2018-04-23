@@ -16,12 +16,29 @@
 package no.digipost.api.useragreements.client;
 
 public final class Headers {
-	public static final String X_Digipost_Prefix = "X-Digipost-";
 
+	private static final String X_Digipost_Prefix = "X-Digipost-";
+
+	/**
+	 * X-Digipost-Signature (Digipost-specific header)
+	 */
 	public static final String X_Digipost_Signature = X_Digipost_Prefix + "Signature";
+
+	/**
+	 * X-Digipost-UserId (Digipost-specific header)
+	 */
 	public static final String X_Digipost_UserId = X_Digipost_Prefix + "UserId";
 
+	/**
+	 * Content-MD5
+	 *
+	 * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.15">RFC 2616 section 14.15</a>
+	 */
 	public static final String Content_MD5 = "Content-MD5";
+
+	/**
+	 * X-Content-SHA256 (Digipost-specific header)
+	 */
 	public static final String X_Content_SHA256 = "X-Content-SHA256";
 
 }
