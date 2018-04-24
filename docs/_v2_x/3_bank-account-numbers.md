@@ -20,17 +20,37 @@ import static no.digipost.api.useragreements.client.AgreementType.BANK_ACCOUNT_N
 // The ID of the receipt supplier party, i.e. the organization with access to bank account numbers
 SenderId sender = SenderId.of(1234L);
 
-// The stream is made available immediately when the client starts receiving the response,
-// which is a rather long chunked http response. The processing of the stream should
+
+// The stream is made available immediately when the client starts receiving
+// the response, which is a rather long chunked http response.
+StreamingRateLimitedResponse<UserId> accountsResponse =
+    client.getAgreementUsers(sender, BANK_ACCOUNT_NUMBER_FOR_RECEIPTS);
+
+
+// The processing of the stream should
 // continuously persist/update the received agreements.
-try (Stream<UserId> accounts = client.getAgreementUsers(sender, BANK_ACCOUNT_NUMBER_FOR_RECEIPTS)) {
-    accounts.forEach(account -> persistAccountNumber(account.serialize()));
-}
+accountsResponse.map(UserId::serialize).forEach(this::persistAccountNumber);
+
+
+// Lastly, get the instant when you are allowed to do the request again, and
+// ensure that this
+Instant nextAllowedRequest = accountsResponse.getNestAllowedRequestTime();
 
 ...
 
 private void persistAccountNumber(String accountNumber) {
     // handle persisting or updating the received account number
+}
+```
+
+### Alternative: consume response with [Java Stream API](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html)
+
+```java
+// Alternatively, one can acquire the underlying Java Stream from the
+// StreamingRateLimitedResponse, but it is imperative with proper resource
+// management and that the stream is closed after it is consumed.
+try (Stream<UserId> accounts = accountsResponse.asStream()) {
+    accounts.map(UserId::serialize).forEach(this::persistAccountNumber);
 }
 ```
 
