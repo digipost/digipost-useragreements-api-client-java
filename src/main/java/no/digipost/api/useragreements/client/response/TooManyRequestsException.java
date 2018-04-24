@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client;
+package no.digipost.api.useragreements.client.response;
+
+import no.digipost.api.useragreements.client.UserAgreementsApiException;
 
 import java.time.Instant;
 import java.util.Optional;
 
 import static no.digipost.api.useragreements.client.ErrorCode.CLIENT_TECHNICAL_ERROR;
 
-public class TooManyRequestsException extends UserAgreementsApiException {
+public class TooManyRequestsException extends UserAgreementsApiException implements WithNextAllowedRequestTime {
 
 	private final Instant nextAllowedRequest;
 
@@ -31,7 +33,8 @@ public class TooManyRequestsException extends UserAgreementsApiException {
 		this.nextAllowedRequest = nextAllowedRequest.orElse(null);
 	}
 
-	public Optional<Instant> getNextAllowedRequest() {
+	@Override
+	public Optional<Instant> getNextAllowedRequestTime() {
 		return Optional.ofNullable(nextAllowedRequest);
 	}
 

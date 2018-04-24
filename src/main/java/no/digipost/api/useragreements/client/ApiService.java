@@ -40,9 +40,9 @@ import static java.time.Duration.ofMinutes;
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static no.digipost.api.useragreements.client.Headers.X_Digipost_UserId;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntities;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntity;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.mapOkResponseOrThrowException;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.unmarshallEntities;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.unmarshallEntity;
 import static no.digipost.cache2.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache2.inmemory.CacheConfig.useSoftValues;
 

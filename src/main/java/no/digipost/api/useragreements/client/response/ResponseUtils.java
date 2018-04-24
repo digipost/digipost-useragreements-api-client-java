@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.util;
+package no.digipost.api.useragreements.client.response;
 
 import no.digipost.api.useragreements.client.Error;
 import no.digipost.api.useragreements.client.ErrorCode;
 import no.digipost.api.useragreements.client.Headers;
 import no.digipost.api.useragreements.client.RuntimeIOException;
-import no.digipost.api.useragreements.client.TooManyRequestsException;
 import no.digipost.api.useragreements.client.UnexpectedResponseException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

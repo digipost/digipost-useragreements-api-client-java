@@ -41,10 +41,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static no.digipost.api.useragreements.client.util.ResponseUtils.isOkResponse;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.readErrorEntity;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntity;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.isOkResponse;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.mapOkResponseOrThrowException;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.readErrorEntity;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.unmarshallEntity;
 
 /**
  * API client for managing Digipost documents on behalf of users

@@ -21,6 +21,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+/**
+ * Represents a streamed response from the Digipost API, and offer mechanisms for consuming
+ * it incrementally. In addition, one should (must) inspect {@link #getNextAllowedRequest()}
+ * after consuming the response and not make any new request against the API resource until
+ * this instant has passed.
+ *
+ * @param <T> The type of the entities contained in the response.
+ */
 public class StreamingRateLimitedResponse<T> {
 
 	@FunctionalInterface
@@ -56,6 +64,15 @@ public class StreamingRateLimitedResponse<T> {
 		return new StreamingRateLimitedResponse<>(asStream().flatMap(mapper), nextAllowedRequest);
 	}
 
+	/**
+	 * Consume each element of the response. This will properly terminate the response
+	 * and close associated resources before the method returns, as opposed to {@link #asStream()}
+	 * where you must handle this yourself. When this method returns, it is thus also safe to
+	 * invoke {@link #getNextAllowedRequest()}, as this instant should have been captured from the
+	 * end of the streaming response.
+	 *
+	 * @param handler The function to invoke for each element.
+	 */
 	public void forEach(ResponseElementHandler<T> handler) {
 		try (Stream<T> autoClosed = asStream()) {
 			elements.forEach(id -> {
@@ -70,8 +87,27 @@ public class StreamingRateLimitedResponse<T> {
 		}
 	}
 
+	/**
+	 * Get the instant when a new request is allowed against the API resource which
+	 * returned this response. If a new request is made too early, the API will respond
+	 * with an error, and containing a new further delayed instant when a new request
+	 * will be allowed.
+	 * <p>
+	 * This method <em>must</em> be invoked <em>after</em> the response has been consumed
+	 * e.g. using {@link #forEach(ResponseElementHandler)}, or acquiring the underlying
+	 * {@link #asStream() stream} and properly consuming that with
+	 * {@code try-with-resources}.
+	 *
+	 * @return the instant when a new request is allowed against the API resource.
+	 * @throws NextAllowedRequestTimeNotFoundException if the instant has not yet been captured
+	 *         from the response.
+	 */
 	public Instant getNextAllowedRequest() {
-		return nextAllowedRequest.get();
+		Instant instant = nextAllowedRequest.get();
+		if (instant == null) {
+			throw new NextAllowedRequestTimeNotFoundException();
+		}
+		return instant;
 	}
 
 	/**
@@ -105,10 +141,6 @@ public class StreamingRateLimitedResponse<T> {
 
 		@Override
 		public Instant get() {
-			if (nextAllowedRequest == null) {
-				throw new IllegalStateException(
-						"The instant for next allowed request has not been acquired yet. The response must be consumed before trying to get this value.");
-			}
 			return nextAllowedRequest;
 		}
 	}

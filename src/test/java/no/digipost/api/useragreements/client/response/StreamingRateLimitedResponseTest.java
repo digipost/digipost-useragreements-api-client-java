@@ -15,9 +15,9 @@
  */
 package no.digipost.api.useragreements.client.response;
 
-import no.digipost.api.useragreements.client.response.StreamingRateLimitedResponse;
-import no.digipost.api.useragreements.client.response.WithNextAllowedRequestTime;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -57,6 +57,9 @@ public class StreamingRateLimitedResponseTest {
 		}
 	}
 
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
+
 	@Test
 	public void populatesNextAllowedRequestTimeWhenConsumingStream() {
 		Instant nextAllowedRequest = Instant.now().plus(Duration.ofMinutes(10));
@@ -66,5 +69,12 @@ public class StreamingRateLimitedResponseTest {
 			assertThat(responseStrings.collect(toList()), contains("0", "0", "1"));
 		}
 		assertThat(response, where(StreamingRateLimitedResponse::getNextAllowedRequest, is(nextAllowedRequest)));
+	}
+
+	@Test
+	public void throwsExceptionIfNextAllowedRequestTimeNotPopuatedYet() {
+		StreamingRateLimitedResponse<?> response = new StreamingRateLimitedResponse<>(Stream.empty(), () -> null);
+		expectedException.expect(NextAllowedRequestTimeNotFoundException.class);
+		response.getNextAllowedRequest();
 	}
 }

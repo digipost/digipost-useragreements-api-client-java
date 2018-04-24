@@ -36,6 +36,7 @@ public enum ErrorCode {
 	IO_EXCEPTION,
 	NO_ENTITY,
 	MULTIPLE_ENTITIES,
+	MISSING_NEXT_ALLOWED_REQUEST_TIME,
 	GENERAL_ERROR;
 
 	public static ErrorCode parse(final String error) {
