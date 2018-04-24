@@ -20,6 +20,7 @@ import no.digipost.api.useragreements.client.filters.request.RequestDateIntercep
 import no.digipost.api.useragreements.client.filters.request.RequestSignatureInterceptor;
 import no.digipost.api.useragreements.client.filters.request.RequestUserAgentInterceptor;
 import no.digipost.api.useragreements.client.filters.response.ResponseDateInterceptor;
+import no.digipost.api.useragreements.client.response.StreamingRateLimitedResponse;
 import no.digipost.api.useragreements.client.security.CryptoUtil;
 import no.digipost.api.useragreements.client.security.PrivateKeySigner;
 import no.digipost.http.client3.DigipostHttpClientFactory;
@@ -39,7 +40,6 @@ import java.security.PrivateKey;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static no.digipost.api.useragreements.client.util.ResponseUtils.isOkResponse;
 import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
@@ -185,15 +185,15 @@ public class DigipostUserAgreementsClient {
 		return apiService.getDocumentContent(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(DocumentContent.class));
 	}
 
-	public Stream<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType) {
+	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType) {
 		return getAgreementOwners(senderId, agreementType, null);
 	}
 
-	public Stream<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
+	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
 		return getAgreementOwners(senderId, agreementType, smsNotificationEnabled, null);
 	}
 
-	public Stream<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
+	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
 		return apiService.getAgreementOwners(senderId, agreementType, smsNotificationEnabled, requestTrackingId);

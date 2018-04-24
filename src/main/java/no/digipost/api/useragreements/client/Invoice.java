@@ -15,7 +15,6 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.xml.DateXmlAdapter;
 import no.digipost.api.useragreements.client.xml.InvoiceStatusXmlAdapter;
 import no.digipost.api.useragreements.client.xml.KidXmlAdapter;
 
@@ -41,7 +40,6 @@ public class Invoice {
 	@XmlElement
 	private String account;
 	@XmlElement(name = "due-date", type = String.class)
-	@XmlJavaTypeAdapter(DateXmlAdapter.class)
 	@XmlSchemaType(name = "date")
 	private LocalDate dueDate;
 	@XmlElement

@@ -15,29 +15,28 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.xml.UserIdXmlAdapter;
+import no.digipost.api.useragreements.client.response.WithNextAllowedRequestTime;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "agreement-owners")
-public class AgreementOwners {
+public class AgreementOwners implements WithNextAllowedRequestTime {
 
-	@XmlElement(name = "user-id")
-	@XmlJavaTypeAdapter(UserIdXmlAdapter.class)
+	@XmlElement(name = "id")
 	private List<UserId> ids;
 
-	@XmlElement
-	private Instant nextRequestAllowedAt;
+	@XmlElement(name = "next-allowed-request")
+	private Instant nextRequestAllowed;
 
 	public AgreementOwners(final List<UserId> users) {
 		this.ids = users;
@@ -50,8 +49,13 @@ public class AgreementOwners {
 		return ids;
 	}
 
-	public Optional<Instant> getNextRequestAllowedAt() {
-		return Optional.ofNullable(nextRequestAllowedAt);
+	public Stream<UserId> getIdsAsStream() {
+		return getIds().stream();
+	}
+
+	@Override
+	public Optional<Instant> getNextAllowedRequestTime() {
+		return Optional.ofNullable(nextRequestAllowed);
 	}
 
 	@Override

@@ -15,6 +15,7 @@
  */
 package no.digipost.api.useragreements.client;
 
+import no.digipost.api.useragreements.client.response.StreamingRateLimitedResponse;
 import no.digipost.cache2.inmemory.SingleCached;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -34,7 +35,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.stream.Stream;
 
 import static java.time.Duration.ofMinutes;
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
@@ -151,7 +151,7 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public Stream<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
+	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId) + "/agreement-owners")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
@@ -165,7 +165,7 @@ public class ApiService {
 		CloseableHttpResponse response;
 		try {
 			response = httpClient.execute(request);
-			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementOwners.class).flatMap(a -> a.getIds().stream()));
+			return new StreamingRateLimitedResponse<>(mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementOwners.class)), AgreementOwners::getIdsAsStream);
 		} catch (IOException e) {
 			throw new RuntimeIOException(e.getMessage(), e);
 		}
