@@ -15,14 +15,16 @@
  */
 package no.digipost.api.useragreements.client;
 
-import no.digipost.api.useragreements.client.response.WithNextAllowedRequestTime;
+import no.digipost.api.useragreements.client.response.WithDelayUntilNextAllowedRequestTime;
+import no.digipost.api.useragreements.client.xml.LongSecondsXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,16 +32,18 @@ import java.util.stream.Stream;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "agreement-owners")
-public class AgreementOwners implements WithNextAllowedRequestTime {
+public class AgreementOwners implements WithDelayUntilNextAllowedRequestTime {
 
 	@XmlElement(name = "id")
 	private List<UserId> ids;
 
-	@XmlElement(name = "next-allowed-request")
-	private Instant nextRequestAllowed;
+	@XmlElement(name = "seconds-until-next-allowed-request")
+	@XmlJavaTypeAdapter(LongSecondsXmlAdapter.class)
+	private Duration delayUntilNextAllowedRequest;
 
-	public AgreementOwners(final List<UserId> users) {
+	public AgreementOwners(final List<UserId> users, Duration delayUntilNextAllowedRequest) {
 		this.ids = users;
+		this.delayUntilNextAllowedRequest = delayUntilNextAllowedRequest;
 	}
 
 	public List<UserId> getIds() {
@@ -54,8 +58,8 @@ public class AgreementOwners implements WithNextAllowedRequestTime {
 	}
 
 	@Override
-	public Optional<Instant> getNextAllowedRequestTime() {
-		return Optional.ofNullable(nextRequestAllowed);
+	public Optional<Duration> getDelayUntilNextAllowedRequest() {
+		return Optional.ofNullable(delayUntilNextAllowedRequest);
 	}
 
 	@Override

@@ -15,7 +15,7 @@
  */
 package no.digipost.api.useragreements.client.response;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -23,9 +23,9 @@ import java.util.stream.Stream;
 
 /**
  * Represents a streamed response from the Digipost API, and offer mechanisms for consuming
- * it incrementally. In addition, one should (must) inspect {@link #getNextAllowedRequest()}
+ * it incrementally. In addition, one should (must) inspect {@link #getDelayUntilNextAllowedRequest()}
  * after consuming the response and not make any new request against the API resource until
- * this instant has passed.
+ * this duration of time has passed.
  *
  * @param <T> The type of the entities contained in the response.
  */
@@ -38,37 +38,37 @@ public class StreamingRateLimitedResponse<T> {
 
 	private final Stream<T> elements;
 	private final AtomicBoolean consumed = new AtomicBoolean(false);
-	private final Supplier<Instant> nextAllowedRequest;
+	private final Supplier<Duration> delayUntilNextAllowedRequest;
 
-	public <S extends WithNextAllowedRequestTime> StreamingRateLimitedResponse(Stream<S> responseElements, Function<? super S, Stream<T>> flatMapper) {
-		this(responseElements, new DeferredNextAllowedRequest(), flatMapper);
+	public <S extends WithDelayUntilNextAllowedRequestTime> StreamingRateLimitedResponse(Stream<S> responseElements, Function<? super S, Stream<T>> flatMapper) {
+		this(responseElements, new DeferredDelayUntilNextAllowedRequest(), flatMapper);
 	}
 
-	private <S extends WithNextAllowedRequestTime> StreamingRateLimitedResponse(Stream<S> responseElements, DeferredNextAllowedRequest deferredNextAllowedRequest, Function<? super S, Stream<T>> flatMapper) {
+	private <S extends WithDelayUntilNextAllowedRequestTime> StreamingRateLimitedResponse(Stream<S> responseElements, DeferredDelayUntilNextAllowedRequest deferredNextAllowedRequest, Function<? super S, Stream<T>> flatMapper) {
 		this(responseElements.flatMap(elements -> {
 			deferredNextAllowedRequest.register(elements);
 			return flatMapper.apply(elements);
 		}), deferredNextAllowedRequest);
 	}
 
-	public StreamingRateLimitedResponse(Stream<T> elements, Supplier<Instant> nextAllowedRequest) {
+	public StreamingRateLimitedResponse(Stream<T> elements, Supplier<Duration> delayUntilNextAllowedRequest) {
 		this.elements = elements;
-		this.nextAllowedRequest = nextAllowedRequest;
+		this.delayUntilNextAllowedRequest = delayUntilNextAllowedRequest;
 	}
 
 	public <R> StreamingRateLimitedResponse<R> map(Function<? super T, R> mapper) {
-		return new StreamingRateLimitedResponse<>(asStream().map(mapper), nextAllowedRequest);
+		return new StreamingRateLimitedResponse<>(asStream().map(mapper), delayUntilNextAllowedRequest);
 	}
 
 	public <R> StreamingRateLimitedResponse<R> flatMap(Function<? super T, Stream<R>> mapper) {
-		return new StreamingRateLimitedResponse<>(asStream().flatMap(mapper), nextAllowedRequest);
+		return new StreamingRateLimitedResponse<>(asStream().flatMap(mapper), delayUntilNextAllowedRequest);
 	}
 
 	/**
 	 * Consume each element of the response. This will properly terminate the response
 	 * and close associated resources before the method returns, as opposed to {@link #asStream()}
 	 * where you must handle this yourself. When this method returns, it is thus also safe to
-	 * invoke {@link #getNextAllowedRequest()}, as this instant should have been captured from the
+	 * invoke {@link #getDelayUntilNextAllowedRequest()}, as this instant should have been captured from the
 	 * end of the streaming response.
 	 *
 	 * @param handler The function to invoke for each element.
@@ -88,26 +88,26 @@ public class StreamingRateLimitedResponse<T> {
 	}
 
 	/**
-	 * Get the instant when a new request is allowed against the API resource which
-	 * returned this response. If a new request is made too early, the API will respond
-	 * with an error, and containing a new further delayed instant when a new request
-	 * will be allowed.
+	 * Get the duration until a new request is allowed against the API resource which
+	 * returned this response. If a new request is made before waiting this duration,
+	 * the API will respond with an error, and requiring a new duration to wait before
+	 * a new request will be allowed.
 	 * <p>
 	 * This method <em>must</em> be invoked <em>after</em> the response has been consumed
 	 * e.g. using {@link #forEach(ResponseElementHandler)}, or acquiring the underlying
 	 * {@link #asStream() stream} and properly consuming that with
 	 * {@code try-with-resources}.
 	 *
-	 * @return the instant when a new request is allowed against the API resource.
-	 * @throws NextAllowedRequestTimeNotFoundException if the instant has not yet been captured
+	 * @return the durtaion until a new request is allowed against the API resource.
+	 * @throws NextAllowedRequestTimeNotFoundException if the duration has not yet been captured
 	 *         from the response.
 	 */
-	public Instant getNextAllowedRequest() {
-		Instant instant = nextAllowedRequest.get();
-		if (instant == null) {
+	public Duration getDelayUntilNextAllowedRequest() {
+		Duration delay = delayUntilNextAllowedRequest.get();
+		if (delay == null) {
 			throw new NextAllowedRequestTimeNotFoundException();
 		}
-		return instant;
+		return delay;
 	}
 
 	/**
@@ -132,16 +132,16 @@ public class StreamingRateLimitedResponse<T> {
 	}
 
 
-	private static final class DeferredNextAllowedRequest implements Supplier<Instant> {
-		private volatile Instant nextAllowedRequest;
+	private static final class DeferredDelayUntilNextAllowedRequest implements Supplier<Duration> {
+		private volatile Duration delayUntilNextAllowedRequest;
 
-		void register(WithNextAllowedRequestTime element) {
-			element.getNextAllowedRequestTime().ifPresent(nextAllowedRequestTime -> this.nextAllowedRequest = nextAllowedRequestTime);
+		void register(WithDelayUntilNextAllowedRequestTime element) {
+			element.getDelayUntilNextAllowedRequest().ifPresent(delay -> this.delayUntilNextAllowedRequest = delay);
 		}
 
 		@Override
-		public Instant get() {
-			return nextAllowedRequest;
+		public Duration get() {
+			return delayUntilNextAllowedRequest;
 		}
 	}
 }

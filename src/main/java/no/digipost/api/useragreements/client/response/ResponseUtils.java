@@ -34,6 +34,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Optional;
@@ -62,10 +64,16 @@ public final class ResponseUtils {
 		if (isOkResponse(statusLine.getStatusCode())) {
 			return okResponseMapper.apply(response);
 		} else if (statusLine.getStatusCode() == 429) { // Too Many Requests
-			Optional<Instant> nextAllowedRequest = Optional.ofNullable(response.getFirstHeader(Headers.Retry_After))
-				.flatMap(h -> Optional.ofNullable(h.getValue()))
-				.map(retryAfterValue -> RFC_1123_DATE_TIME.parse(retryAfterValue, Instant::from));
-			throw new TooManyRequestsException(nextAllowedRequest);
+			TooManyRequestsException tooManyRequests;
+			try {
+				tooManyRequests = parseDelayDurationOfRetryAfterHeader(response)
+						.map(TooManyRequestsException::new)
+						.orElseGet(TooManyRequestsException::new);
+			} catch (Exception e) {
+				tooManyRequests = new TooManyRequestsException();
+				tooManyRequests.addSuppressed(e);
+			}
+			throw tooManyRequests;
 		} else {
 			throw new UnexpectedResponseException(statusLine, readErrorEntity(response));
 		}
@@ -152,6 +160,31 @@ public final class ResponseUtils {
 		return Optional.ofNullable(exception);
 	}
 
+	public static Optional<Duration> parseDelayDurationOfRetryAfterHeader(HttpResponse response) {
+		return parseDelayDurationOfRetryAfterHeader(response, Clock.systemUTC());
+	}
+
+	public static Optional<Duration> parseDelayDurationOfRetryAfterHeader(HttpResponse response, Clock clock) {
+		return getValueOfFirstHeader(response, Headers.Retry_After)
+				.map(retryAfterValue -> {
+					try {
+						long parsedSeconds = Long.parseLong(retryAfterValue);
+						return Duration.ofSeconds(parsedSeconds);
+					} catch (NumberFormatException secondsNotParseable) {
+						try {
+							Instant parsedInstant = RFC_1123_DATE_TIME.parse(retryAfterValue, Instant::from);
+							return Duration.between(clock.instant(), parsedInstant);
+						} catch (RuntimeException e) {
+							e.addSuppressed(secondsNotParseable);
+							throw e;
+						}
+					}
+				});
+	}
+
+	public static Optional<String> getValueOfFirstHeader(HttpResponse response, String headerName) {
+		return Optional.ofNullable(response.getFirstHeader(headerName)).flatMap(h -> Optional.ofNullable(h.getValue()));
+	}
 
 
 	public static boolean isOkResponse(HttpResponse response) {

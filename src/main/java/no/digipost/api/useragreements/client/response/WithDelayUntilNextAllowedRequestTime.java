@@ -15,11 +15,11 @@
  */
 package no.digipost.api.useragreements.client.response;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.util.Optional;
 
-public interface WithNextAllowedRequestTime {
+public interface WithDelayUntilNextAllowedRequestTime {
 
-	Optional<Instant> getNextAllowedRequestTime();
+	Optional<Duration> getDelayUntilNextAllowedRequest();
 
 }

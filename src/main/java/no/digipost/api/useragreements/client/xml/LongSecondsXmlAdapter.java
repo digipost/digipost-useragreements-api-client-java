@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.api.useragreements.client.response;
+package no.digipost.api.useragreements.client.xml;
 
-import no.digipost.api.useragreements.client.ErrorCode;
-import no.digipost.api.useragreements.client.UserAgreementsApiException;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-public class NextAllowedRequestTimeNotFoundException extends UserAgreementsApiException {
+import java.time.Duration;
 
-	public NextAllowedRequestTimeNotFoundException() {
-		super(ErrorCode.MISSING_NEXT_ALLOWED_REQUEST_TIME,
-				"The duration to wait until next allowed request has not been acquired yet. " +
-				"The response must be consumed before trying to get this value.");
+public class LongSecondsXmlAdapter extends XmlAdapter<Long, Duration> {
+
+	@Override
+	public Duration unmarshal(Long seconds) {
+		return seconds != null ? Duration.ofSeconds(seconds) : null;
 	}
+
+	@Override
+	public Long marshal(Duration duration) {
+		return duration != null ? duration.getSeconds() : null;
+	}
+
 }

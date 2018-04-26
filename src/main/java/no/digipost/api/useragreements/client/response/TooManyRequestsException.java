@@ -17,25 +17,30 @@ package no.digipost.api.useragreements.client.response;
 
 import no.digipost.api.useragreements.client.UserAgreementsApiException;
 
-import java.time.Instant;
+import java.time.Duration;
 import java.util.Optional;
 
 import static no.digipost.api.useragreements.client.ErrorCode.CLIENT_TECHNICAL_ERROR;
 
-public class TooManyRequestsException extends UserAgreementsApiException implements WithNextAllowedRequestTime {
+public class TooManyRequestsException extends UserAgreementsApiException implements WithDelayUntilNextAllowedRequestTime {
 
-	private final Instant nextAllowedRequest;
+	private final Duration delayUntilNextAllowedRequest;
 
-	public TooManyRequestsException(Optional<Instant> nextAllowedRequest) {
-		super(CLIENT_TECHNICAL_ERROR, "This API resource has a rate limiter, and you are accessing it more frequent than it allows. " +	nextAllowedRequest
-				.map(instant -> "Next request should be done not earlier than " + instant + ".")
-				.orElse("There is no indication when you may try again."));
-		this.nextAllowedRequest = nextAllowedRequest.orElse(null);
+	public TooManyRequestsException() {
+		this(null);
+	}
+
+	public TooManyRequestsException(Duration delayUntilNextAllowed) {
+		super(CLIENT_TECHNICAL_ERROR,
+				"This API resource has a rate limiter, and you are accessing it more frequent than it allows. " +
+				(delayUntilNextAllowed != null ? "Next request should be done not earlier than " + delayUntilNextAllowed.getSeconds() + " seconds from now."
+						                              : "There is no indication when you may try again."));
+		this.delayUntilNextAllowedRequest = delayUntilNextAllowed;
 	}
 
 	@Override
-	public Optional<Instant> getNextAllowedRequestTime() {
-		return Optional.ofNullable(nextAllowedRequest);
+	public Optional<Duration> getDelayUntilNextAllowedRequest() {
+		return Optional.ofNullable(delayUntilNextAllowedRequest);
 	}
 
 }

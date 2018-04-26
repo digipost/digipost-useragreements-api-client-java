@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -33,18 +32,18 @@ import static org.junit.Assert.assertThat;
 
 public class StreamingRateLimitedResponseTest {
 
-	static final class ResponseElements implements WithNextAllowedRequestTime {
+	static final class ResponseElements implements WithDelayUntilNextAllowedRequestTime {
 
 		private final int amount;
-		private final Optional<Instant> nextAllowedRequest;
+		private final Optional<Duration> nextAllowedRequest;
 
 		public ResponseElements(int amount) {
 			this(amount, null);
 		}
 
-		public ResponseElements(int amount, Instant nextAllowedRequest) {
+		public ResponseElements(int amount, Duration delayUntilNextAllowedRequest) {
 			this.amount = amount;
-			this.nextAllowedRequest = Optional.ofNullable(nextAllowedRequest);
+			this.nextAllowedRequest = Optional.ofNullable(delayUntilNextAllowedRequest);
 		}
 
 		public Stream<Integer> elements() {
@@ -52,7 +51,7 @@ public class StreamingRateLimitedResponseTest {
 		}
 
 		@Override
-		public Optional<Instant> getNextAllowedRequestTime() {
+		public Optional<Duration> getDelayUntilNextAllowedRequest() {
 			return nextAllowedRequest;
 		}
 	}
@@ -61,20 +60,20 @@ public class StreamingRateLimitedResponseTest {
 	public final ExpectedException expectedException = ExpectedException.none();
 
 	@Test
-	public void populatesNextAllowedRequestTimeWhenConsumingStream() {
-		Instant nextAllowedRequest = Instant.now().plus(Duration.ofMinutes(10));
-		StreamingRateLimitedResponse<String> response = new StreamingRateLimitedResponse<>(Stream.of(new ResponseElements(1), new ResponseElements(2, nextAllowedRequest)), ResponseElements::elements)
+	public void populatesDelayUntilNextAllowedRequestWhenConsumingStream() {
+		Duration tenMinutes = Duration.ofMinutes(10);
+		StreamingRateLimitedResponse<String> response = new StreamingRateLimitedResponse<>(Stream.of(new ResponseElements(1), new ResponseElements(2, tenMinutes)), ResponseElements::elements)
 				.map(String::valueOf);
 		try (Stream<String> responseStrings = response.asStream()) {
 			assertThat(responseStrings.collect(toList()), contains("0", "0", "1"));
 		}
-		assertThat(response, where(StreamingRateLimitedResponse::getNextAllowedRequest, is(nextAllowedRequest)));
+		assertThat(response, where(StreamingRateLimitedResponse::getDelayUntilNextAllowedRequest, is(tenMinutes)));
 	}
 
 	@Test
-	public void throwsExceptionIfNextAllowedRequestTimeNotPopuatedYet() {
+	public void throwsExceptionIfDelayUntilNextAllowedRequestNotPopuatedYet() {
 		StreamingRateLimitedResponse<?> response = new StreamingRateLimitedResponse<>(Stream.empty(), () -> null);
 		expectedException.expect(NextAllowedRequestTimeNotFoundException.class);
-		response.getNextAllowedRequest();
+		response.getDelayUntilNextAllowedRequest();
 	}
 }
