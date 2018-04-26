@@ -24,7 +24,7 @@ SenderId sender = SenderId.of(1234L);
 // The stream is made available immediately when the client starts receiving
 // the response, which is a rather long chunked http response.
 StreamingRateLimitedResponse<UserId> accountsResponse =
-    client.getAgreementUsers(sender, BANK_ACCOUNT_NUMBER_FOR_RECEIPTS);
+    client.getAgreementOwners(sender, BANK_ACCOUNT_NUMBER_FOR_RECEIPTS);
 
 
 // The processing of the stream should
@@ -32,9 +32,9 @@ StreamingRateLimitedResponse<UserId> accountsResponse =
 accountsResponse.map(UserId::serialize).forEach(this::persistAccountNumber);
 
 
-// Lastly, get the instant when you are allowed to do the request again, and
-// ensure that this
-Instant nextAllowedRequest = accountsResponse.getNestAllowedRequestTime();
+// Lastly, get the duration you must wait before you are allowed to do the request
+// again, and ensure that any subsequent request does not happen before.
+Duration delay = accountsResponse.getDelayUntilNextAllowedRequest();
 
 ...
 
