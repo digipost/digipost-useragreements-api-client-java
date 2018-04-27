@@ -13,5 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://api.digipost.no/user/schema/v1", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@XmlSchema(namespace = "http://api.digipost.no/user/schema/v1", elementFormDefault = QUALIFIED)
+@XmlJavaTypeAdapters({
+		@XmlJavaTypeAdapter(type = Instant.class, value = InstantXmlAdapter.class),
+		@XmlJavaTypeAdapter(type = LocalDate.class, value = DateXmlAdapter.class),
+		@XmlJavaTypeAdapter(type = UserId.class, value = UserIdXmlAdapter.class)
+})
 package no.digipost.api.useragreements.client;
+
+import no.digipost.api.useragreements.client.xml.DateXmlAdapter;
+import no.digipost.api.useragreements.client.xml.InstantXmlAdapter;
+import no.digipost.api.useragreements.client.xml.UserIdXmlAdapter;
+
+import javax.xml.bind.annotation.XmlSchema;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+
+import java.time.Instant;
+import java.time.LocalDate;
+
+import static javax.xml.bind.annotation.XmlNsForm.QUALIFIED;

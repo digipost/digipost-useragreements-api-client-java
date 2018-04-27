@@ -8,7 +8,7 @@ API specification: https://github.com/digipost/invoice-api-specification
 
 ## Download
 
-The last stable version is `1.2`, but a pending 2.0 release is available as `2.0-beta`.
+The last stable version is `1.2`, but a pending 2.0 release is available as `2.0-delta`.
 
 The library can be acquired from Maven Central Repository, using the dependency management tool of your choice.
 For Maven you can use the following dependency:

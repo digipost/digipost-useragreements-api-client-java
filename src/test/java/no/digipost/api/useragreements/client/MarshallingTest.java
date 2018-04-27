@@ -15,7 +15,6 @@
  */
 package no.digipost.api.useragreements.client;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +24,14 @@ import javax.xml.bind.JAXB;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.time.Duration;
+import java.util.List;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
 public class MarshallingTest {
 
@@ -41,15 +45,28 @@ public class MarshallingTest {
 		JAXB.marshal(agreement, xml);
 		log.debug(xml.toString());
 		final Agreement unmarshal = JAXB.unmarshal(new StringReader(xml.toString()), Agreement.class);
-		Assert.assertThat(unmarshal.getUserId(), is(userId));
+		assertThat(unmarshal.getUserId(), is(userId));
 	}
 
 	@Test
 	public void shouldMarshallUnmarshallAgreements() {
 		final StringWriter xml = new StringWriter();
-		final Agreements agreements = new Agreements(Collections.singletonList(Agreement.createInvoiceBankAgreement(UserId.of("01017012345"), true)));
+		final Agreements agreements = new Agreements(singletonList(Agreement.createInvoiceBankAgreement(UserId.of("01017012345"), true)));
 		JAXB.marshal(agreements, xml);
 		log.debug(xml.toString());
 		JAXB.unmarshal(new StringReader(xml.toString()), Agreements.class);
+	}
+
+	@Test
+	public void shouldMarshallUnmarshallAgreementOwners() {
+		StringWriter xml = new StringWriter();
+		List<UserId> accountNumbers = asList(UserId.of("180020111111"), UserId.of("180020111112"));
+		Duration delay = Duration.ofSeconds(42);
+		AgreementOwners owners = new AgreementOwners(accountNumbers, delay);
+		JAXB.marshal(owners, xml);
+		log.debug(xml.toString());
+		AgreementOwners unmarshalled = JAXB.unmarshal(new StringReader(xml.toString()), AgreementOwners.class);
+		assertThat(unmarshalled.getDelayUntilNextAllowedRequest(), contains(delay));
+		assertThat(unmarshalled.getIds(), is(accountNumbers));
 	}
 }

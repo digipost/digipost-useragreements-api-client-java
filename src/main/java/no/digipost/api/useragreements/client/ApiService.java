@@ -15,6 +15,7 @@
  */
 package no.digipost.api.useragreements.client;
 
+import no.digipost.api.useragreements.client.response.StreamingRateLimitedResponse;
 import no.digipost.cache2.inmemory.SingleCached;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -34,15 +35,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.stream.Stream;
 
 import static java.time.Duration.ofMinutes;
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static no.digipost.api.useragreements.client.Headers.X_Digipost_UserId;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.mapOkResponseOrThrowException;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntities;
-import static no.digipost.api.useragreements.client.util.ResponseUtils.unmarshallEntity;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.mapOkResponseOrThrowException;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.unmarshallEntities;
+import static no.digipost.api.useragreements.client.response.ResponseUtils.unmarshallEntity;
 import static no.digipost.cache2.inmemory.CacheConfig.expireAfterAccess;
 import static no.digipost.cache2.inmemory.CacheConfig.useSoftValues;
 
@@ -151,9 +151,9 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public Stream<UserId> getAgreementUsers(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
+	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(userAgreementsPath(senderId) + "/agreement-users")
+				.setPath(userAgreementsPath(senderId) + "/agreement-owners")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		if (smsNotificationsEnabled != null) {
 			uriBuilder
@@ -165,7 +165,7 @@ public class ApiService {
 		CloseableHttpResponse response;
 		try {
 			response = httpClient.execute(request);
-			return mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementUsers.class).flatMap(a -> a.getUsers().stream()));
+			return new StreamingRateLimitedResponse<>(mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementOwners.class)), AgreementOwners::getIdsAsStream);
 		} catch (IOException e) {
 			throw new RuntimeIOException(e.getMessage(), e);
 		}
