@@ -169,21 +169,16 @@ public class ApiService {
 		} catch (IOException ioe) {
 			throw new RuntimeIOException(ioe.getMessage(), ioe);
 		} catch (RuntimeException rte) {
-			closeResponse(response);
+			if (response != null) {
+				try {
+					response.close();
+				} catch (IOException e) {
+					rte.addSuppressed(e);
+				}
+			}
 			throw rte;
 		}
 	}
-
-	private void closeResponse(CloseableHttpResponse response) {
-		if (response != null) {
-			try {
-				response.close();
-			} catch (IOException e) {
-				throw new RuntimeIOException(e.getMessage(), e);
-			}
-		}
-	}
-
 
 	private static String userAgreementsPath(final SenderId senderId) {
 		return senderId.serialize() + "/" + USER_AGREEMENTS_PATH;
