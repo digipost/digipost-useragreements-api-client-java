@@ -162,15 +162,23 @@ public class ApiService {
 
 		HttpGet request = newGetRequest(uriBuilder, requestTrackingId);
 		request.setHeader(X_Digipost_UserId, brokerId.serialize());
-		CloseableHttpResponse response;
+		CloseableHttpResponse response = null;
 		try {
 			response = httpClient.execute(request);
 			return new StreamingRateLimitedResponse<>(mapOkResponseOrThrowException(response, r -> unmarshallEntities(r, AgreementOwners.class)), AgreementOwners::getIdsAsStream);
-		} catch (IOException e) {
-			throw new RuntimeIOException(e.getMessage(), e);
+		} catch (IOException ioe) {
+			throw new RuntimeIOException(ioe.getMessage(), ioe);
+		} catch (RuntimeException rte) {
+			if (response != null) {
+				try {
+					response.close();
+				} catch (IOException e) {
+					rte.addSuppressed(e);
+				}
+			}
+			throw rte;
 		}
 	}
-
 
 	private static String userAgreementsPath(final SenderId senderId) {
 		return senderId.serialize() + "/" + USER_AGREEMENTS_PATH;
