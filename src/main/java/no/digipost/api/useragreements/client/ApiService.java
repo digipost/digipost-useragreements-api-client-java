@@ -171,9 +171,6 @@ public class ApiService {
 		} catch (RuntimeException rte) {
 			closeResponse(response);
 			throw rte;
-		} catch (Exception e) {
-			closeResponse(response);
-			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
