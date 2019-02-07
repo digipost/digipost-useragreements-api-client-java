@@ -12,3 +12,7 @@ API specification: https://github.com/digipost/invoice-api-specification
 To build and use the API client you need the *Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files for JDK/JRE*
 
 http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+## Releasing (Digipost organization members only)
+
+See docs/systemer/open-source-biblioteker.md
