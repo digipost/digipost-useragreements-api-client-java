@@ -1,5 +1,6 @@
 # Java client library for Digipost User Agreement API
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/no.digipost/digipost-useragreements-api-client-java/badge.svg)](https://maven-badges.herokuapp.com/maven-central/no.digipost/digipost-useragreements-api-client-java)
 [![Build Status](https://travis-ci.org/digipost/digipost-useragreements-api-client-java.svg?branch=master)](https://travis-ci.org/digipost/digipost-useragreements-api-client-java)
 
 Online documentation: https://digipost.github.io/digipost-useragreements-api-client-java
