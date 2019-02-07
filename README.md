@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/digipost/digipost-useragreements-api-client-java.svg?branch=master)](https://travis-ci.org/digipost/digipost-useragreements-api-client-java)
-
 # Java client library for Digipost User Agreement API
+
+[![Build Status](https://travis-ci.org/digipost/digipost-useragreements-api-client-java.svg?branch=master)](https://travis-ci.org/digipost/digipost-useragreements-api-client-java)
 
 Online documentation: https://digipost.github.io/digipost-useragreements-api-client-java
 
