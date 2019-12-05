@@ -21,9 +21,16 @@ This software includes third party software subject to the following licenses:
   Digipost HTTP Client Builder under The Apache Software License, Version 2.0
   Digipost User Agreements API Client under The Apache Software License, Version 2.0
   error-prone annotations under Apache 2.0
+  Extended StAX API under Eclipse Distribution License - v 1.0
+  fastinfoset under Apache License, Version 2.0 or Eclipse Distribution License - v 1.0
   FindBugs-jsr305 under The Apache Software License, Version 2.0
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
+  istack common utility code runtime under Eclipse Distribution License - v 1.0
   J2ObjC Annotations under The Apache Software License, Version 2.0
+  jakarta.xml.bind-api under Eclipse Distribution License - v 1.0
+  JavaBeans Activation Framework API jar under EDL 1.0
+  JAXB Runtime under Eclipse Distribution License - v 1.0
   JCL 1.2 implemented over SLF4J under MIT License
   SLF4J API Module under MIT License
+  TXW2 Runtime under Eclipse Distribution License - v 1.0
 

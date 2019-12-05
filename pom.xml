@@ -22,12 +22,11 @@
 	<parent>
 		<groupId>no.digipost</groupId>
 		<artifactId>digipost-open-super-pom</artifactId>
-		<version>1</version>
-		<relativePath />
+		<version>6</version>
 	</parent>
 
 	<artifactId>digipost-useragreements-api-client-java</artifactId>
-	<version>2.1-SNAPSHOT</version>
+	<version>LOCAL-SNAPSHOT</version>
 
 	<name>Digipost User Agreements API Client</name>
 	<description>Java library for interacting with the Digipost UserAgreements API</description>
@@ -38,7 +37,7 @@
 
 		<bouncycastle.version>1.54</bouncycastle.version>
 		<slf4j.version>1.7.25</slf4j.version>
-		<jaxb.version>2.2.7</jaxb.version>
+		<jaxb.version>2.3.2</jaxb.version>
 	</properties>
 
 	<dependencies>
@@ -46,6 +45,17 @@
 			<groupId>no.digipost</groupId>
 			<artifactId>digipost-cache</artifactId>
 			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>${jaxb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>2.3.2</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -185,6 +195,19 @@
 							<excludeScope>test</excludeScope>
 						</excludeScopes>
 					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>jakarta.xml.bind</groupId>
+							<artifactId>jakarta.xml.bind-api</artifactId>
+							<version>2.3.2</version>
+						</dependency>
+						<dependency>
+							<groupId>org.glassfish.jaxb</groupId>
+							<artifactId>jaxb-runtime</artifactId>
+							<version>2.3.2</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -221,13 +244,6 @@
 				<plugin>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>3.0.1</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.0</version>
-					<configuration>
-						<quiet>true</quiet>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -268,6 +284,8 @@
 						<exclude>**/*.p12</exclude>
 						<exclude>**/user-agent.properties</exclude>
 						<exclude>docs/**</exclude>
+						<exclude>.java-version</exclude>
+						<exclude>.github/**/*.yml</exclude>
 					</excludes>
 					<mapping>
 						<editorconfig>SCRIPT_STYLE</editorconfig>
@@ -358,8 +376,8 @@
 										<include>org.bouncycastle:bcprov-jdk15on:${bouncycastle.version}:jar:compile</include>
 										<include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
 										<include>org.apache.commons:commons-lang3</include>
-										<include>com.sun.xml.bind:jaxb-core:${jaxb.version}:jar:compile</include>
-										<include>com.sun.xml.bind:jaxb-impl:${jaxb.version}:jar:compile</include>
+										<include>jakarta.xml.bind:jakarta.xml.bind-api</include>
+										<include>jakarta.activation:jakarta.activation-api</include>
 										<include>org.javassist:javassist:*:jar:test</include>
 										<include>org.slf4j:slf4j-api:*:jar:compile</include>
 										<include>org.slf4j:slf4j-simple:*:jar:test</include>
