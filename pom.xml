@@ -96,11 +96,6 @@
 			<version>3.0.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>24.1-jre</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.7</version>
@@ -383,7 +378,6 @@
 										<include>org.slf4j:slf4j-simple:*:jar:test</include>
 										<include>no.digipost:digipost-cache</include>
 										<include>com.github.ben-manes.caffeine:caffeine</include>
-										<include>com.google.guava:guava</include>
 										<include>com.google.code.findbugs:jsr305</include>
 										<include>com.google.j2objc:j2objc-annotations</include>
 										<include>org.checkerframework:checker-compat-qual</include>

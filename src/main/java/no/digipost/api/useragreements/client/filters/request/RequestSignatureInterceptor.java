@@ -15,7 +15,6 @@
  */
 package no.digipost.api.useragreements.client.filters.request;
 
-import com.google.common.io.ByteStreams;
 import no.digipost.api.useragreements.client.Headers;
 import no.digipost.api.useragreements.client.security.Signer;
 import org.apache.http.HttpEntity;
@@ -28,7 +27,11 @@ import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 
@@ -40,7 +43,7 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 		this(signer, new RequestContentSHA256Filter());
 	}
 
-	public RequestSignatureInterceptor(final Signer signer, final RequestContentHashFilter hashFilter){
+	public RequestSignatureInterceptor(final Signer signer, final RequestContentHashFilter hashFilter) {
 		this.signer = signer;
 		this.hashFilter = hashFilter;
 	}
@@ -59,14 +62,14 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 	@Override
 	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
 
-		if(httpRequest instanceof HttpEntityEnclosingRequest) {
+		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest request = (HttpEntityEnclosingRequest) httpRequest;
 			HttpEntity rqEntity = request.getEntity();
 
 			if (rqEntity == null) {
 				setSignatureHeader(httpRequest);
 			} else {
-				byte[] entityBytes = ByteStreams.toByteArray(rqEntity.getContent());
+				byte[] entityBytes = toByteArray(rqEntity.getContent());
 				hashFilter.settContentHashHeader(entityBytes, request);
 				setSignatureHeader(httpRequest);
 			}
@@ -75,5 +78,18 @@ public class RequestSignatureInterceptor implements HttpRequestInterceptor {
 		}
 
 
+	}
+
+	private byte[] toByteArray(InputStream content) throws IOException {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		byte[] buff = new byte[8192];
+		while(true) {
+			int bytesRead = content.read(buff,0, buff.length);
+			if (bytesRead == -1 ) {
+				break;
+			}
+			outputStream.write(buff, 0, bytesRead);
+		}
+		return outputStream.toByteArray();
 	}
 }
