@@ -98,7 +98,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>24.1-jre</version>
+			<version>29.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -384,6 +384,9 @@
 										<include>no.digipost:digipost-cache</include>
 										<include>com.github.ben-manes.caffeine:caffeine</include>
 										<include>com.google.guava:guava</include>
+										<include>com.google.guava:failureaccess</include>
+										<include>com.google.guava:listenablefuture</include>
+										<include>org.checkerframework:checker-qual</include>
 										<include>com.google.code.findbugs:jsr305</include>
 										<include>com.google.j2objc:j2objc-annotations</include>
 										<include>org.checkerframework:checker-compat-qual</include>
