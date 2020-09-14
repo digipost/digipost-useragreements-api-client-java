@@ -19,6 +19,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.net.URI;
+import java.time.ZonedDateTime;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "user-document")
@@ -30,6 +32,16 @@ public class Document {
 	private String senderName;
 	@XmlElement
 	private Invoice invoice;
+	@XmlElement
+	private String subject;
+	@XmlElement(name = "delivery-time")
+	private ZonedDateTime deliveryTime;
+	@XmlElement(name = "first-accessed")
+	private ZonedDateTime firstAccessed;
+	@XmlElement(name = "authentication-level")
+	private String authenticationLevel;
+	@XmlElement(name = "digipost-uri")
+	private String digipostUri;
 
 	private Document() {}
 
@@ -50,12 +62,38 @@ public class Document {
 		return id;
 	}
 
+	public String getSubject() {
+		return subject;
+	}
+
+	public ZonedDateTime getDeliveryTime() {
+		return deliveryTime;
+	}
+
+	public ZonedDateTime getFirstAccessed() {
+		return firstAccessed;
+	}
+
+	public boolean isRead() {
+		return getFirstAccessed() != null;
+	}
+
+	public AuthenticationLevel getAuthenticationLevel() {
+		return AuthenticationLevel.valueOf(authenticationLevel);
+	}
+
+	public URI getDigipostUri() {
+		return URI.create(digipostUri);
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("Document{");
 		sb.append("id=").append(id);
 		sb.append(", senderName='").append(senderName).append('\'');
 		sb.append(", invoice=").append(invoice);
+		sb.append(", authenticationLevel=").append(authenticationLevel);
+		sb.append(", deliveryTime=").append(deliveryTime);
 		sb.append('}');
 		return sb.toString();
 	}
