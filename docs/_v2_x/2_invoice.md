@@ -38,8 +38,8 @@ if (agreementResult.isSuccess()) {
 	final Agreement agreement = agreementResult.getAgreement();
 } else {
 	switch (agreementResult.getFailedReason()) {
-		case UNKNOWN_USER: //User does not hav a Digipost account
-		case NO_AGREEMENT: //No agreement exist for user
+		case UNKNOWN_USER: //User does not have a Digipost account
+		case NO_AGREEMENT: //No agreement exists for user
 	}
 }
 ```
