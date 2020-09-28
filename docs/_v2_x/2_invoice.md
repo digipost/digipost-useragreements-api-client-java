@@ -6,8 +6,6 @@ layout: default
 
 The agreement type `INVOICE_BANK` allows a sender to retrieve a user's invoices and update their payment status.
 
-[API specification](https://github.com/digipost/invoice-api-specification/blob/master/user-documents.md)
-
 
 
 ### Create, read, update and delete agreement

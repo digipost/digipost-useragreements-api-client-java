@@ -10,16 +10,16 @@ licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
 
 baseurl: "/digipost-useragreements-api-client-java"
 
-currentVersion: "1.x"
+currentVersion: "2.x"
 versions: ["2.x", "1.x"]
 
 collections:
   v1_x:
-      output: true
-      permalink: /v1.x/
+    output: true
+    permalink: /v1.x/
   v2_x:
-      output: true
-      permalink: /v2.x/
+    output: true
+    permalink: /v2.x/
 
 # list of additional links on the right of the top menu
 headerLinks:

@@ -8,7 +8,7 @@ This API makes it possible for third parties (sender) to access and perform cert
 The user grants the sender access to documents through an agreement. The agreement governs which documents the sender can access and what operations it can perform.
 For example, the agreement type INVOICE_BANK allows a sender to retrieve a user's invoices and update their payment status.
 
-[API specification](https://github.com/digipost/invoice-api-specification/blob/master/user-documents.md)
+[API specification](https://github.com/digipost/invoice-api-specification/blob/main/user-documents.md)
 
 ### Download
 
