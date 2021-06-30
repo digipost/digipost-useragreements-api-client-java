@@ -36,8 +36,8 @@ public class Document {
 	private String subject;
 	@XmlElement(name = "delivery-time")
 	private ZonedDateTime deliveryTime;
-	@XmlElement(name = "first-accessed")
-	private ZonedDateTime firstAccessed;
+	@XmlElement(name = "read")
+	private Boolean read;
 	@XmlElement(name = "authentication-level")
 	private String authenticationLevel;
 	@XmlElement(name = "digipost-uri")
@@ -70,12 +70,8 @@ public class Document {
 		return deliveryTime;
 	}
 
-	public ZonedDateTime getFirstAccessed() {
-		return firstAccessed;
-	}
-
 	public boolean isRead() {
-		return getFirstAccessed() != null;
+		return read != null && read;
 	}
 
 	public AuthenticationLevel getAuthenticationLevel() {
