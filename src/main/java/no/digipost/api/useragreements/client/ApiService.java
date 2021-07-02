@@ -181,11 +181,11 @@ public class ApiService {
 	}
 
 	private static String userAgreementsPath(final SenderId senderId) {
-		return senderId.serialize() + "/" + USER_AGREEMENTS_PATH;
+		return "/" + senderId.serialize() + "/" + USER_AGREEMENTS_PATH;
 	}
 
 	private static String userDocumentsPath(final SenderId senderId) {
-		return senderId.serialize() + "/" + USER_DOCUMENTS_PATH;
+		return "/" + senderId.serialize() + "/" + USER_DOCUMENTS_PATH;
 	}
 
 	private <T> T executeHttpRequest(final HttpRequestBase request, final ResponseHandler<T> handler) {
