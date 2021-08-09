@@ -15,28 +15,23 @@
  */
 package no.digipost.api.useragreements.client;
 
-public final class AgreementType {
+import java.util.Arrays;
 
-	public static final AgreementType INVOICE_BANK = new AgreementType("invoice-bank");
-	public static final AgreementType BANK_ACCOUNT_NUMBER_FOR_RECEIPTS = new AgreementType("account-num-for-receipts");
-	public static final AgreementType FETCH_MESSAGES = new AgreementType("fetch-messages");
+public enum AuthenticationLevel {
+	IDPORTEN_4("Id-Porten Two-Factor"),
+	IDPORTEN_3("Id-Porten MinId", IDPORTEN_4),
+	TWO_FACTOR("Two-Factor", IDPORTEN_4),
+	PASSWORD("Password", TWO_FACTOR, IDPORTEN_3, IDPORTEN_4);
 
-	public static final String QUERY_PARAM_NAME = "agreement-type";
+	final String description;
+	final AuthenticationLevel[] acceptable;
 
-
-	private final String type;
-
-	public AgreementType(final String type) {
-		this.type = type;
+	AuthenticationLevel(String description, AuthenticationLevel... acceptable) {
+		this.description = description;
+		this.acceptable = acceptable;
 	}
 
-	public String getType() {
-		return type;
+	boolean isAccessibleAtLevel(AuthenticationLevel other) {
+		return Arrays.asList(this, acceptable).contains(other);
 	}
-
-	@Override
-	public String toString() {
-		return "AgreementType '" + getType() + "'";
-	}
-
 }

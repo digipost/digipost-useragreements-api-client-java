@@ -52,11 +52,11 @@ if (agreementResult.isSuccess()) {
 final SenderId senderId = SenderId.of(1234L);
 final UserId userId = UserId.of("01017012345");
 
-final List<Document> unpaidInvoice = client.getDocuments(senderId, AgreementType.FETCH_MESSAGES, userId,
-	GetDocumentsQuery.empty());
+final List<Document> previouslyDeliveredDocs = client.getDocuments(senderId, AgreementType.FETCH_MESSAGES,
+	userId, GetDocumentsQuery.empty());
 
 final ZoneId OSLO_ZONE = ZoneId.of("Europe/Oslo");
-final List<Document> allOptions = client.getDocuments(senderId, AgreementType.FETCH_MESSAGES, userId,
+final List<Document> withinTimeWindow = client.getDocuments(senderId, AgreementType.FETCH_MESSAGES, userId,
 	GetDocumentsQuery.builder()
 		.deliveryTimeFrom(ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, OSLO_ZONE))
 		.deliveryTimeTo(ZonedDateTime.now(OSLO_ZONE))
