@@ -1,1 +1,4 @@
 _site
+.ruby-version
+.jekyll-metadata
+
