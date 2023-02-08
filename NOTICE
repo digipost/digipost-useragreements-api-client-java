@@ -12,6 +12,7 @@ This software includes third party software subject to the following licenses:
   Apache Commons Lang under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
+  Bouncy Castle ASN.1 Extension and Utility APIs under Bouncy Castle Licence
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
   Caffeine cache under Apache License, Version 2.0
@@ -31,7 +32,7 @@ This software includes third party software subject to the following licenses:
   jakarta.xml.bind-api under Eclipse Distribution License - v 1.0
   JavaBeans Activation Framework API jar under EDL 1.0
   JAXB Runtime under Eclipse Distribution License - v 1.0
-  JCL 1.2 implemented over SLF4J under MIT License
+  JCL 1.2 implemented over SLF4J under Apache License, Version 2.0
   SLF4J API Module under MIT License
   TXW2 Runtime under Eclipse Distribution License - v 1.0
 
