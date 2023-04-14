@@ -20,10 +20,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.time.LocalDate;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 
-import static no.digipost.api.useragreements.client.AgreementType.INVOICE_BANK;
+import static no.digipost.api.useragreements.client.AgreementType.FETCH_MESSAGES;
 
 public class Examples {
 
@@ -57,23 +60,23 @@ public class Examples {
 		final UserId userId = UserId.of("01017012345");
 
 		//CreateAgreement
-		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, false));
+		client.createOrReplaceAgreement(senderId, new Agreement(FETCH_MESSAGES, userId, new HashMap<>()));
 
 		//GetAgreement
-		final GetAgreementResult agreement = client.getAgreement(senderId, INVOICE_BANK, userId);
+		final GetAgreementResult agreement = client.getAgreement(senderId, FETCH_MESSAGES, userId);
 
 		//UpdateAgreement
-		client.createOrReplaceAgreement(senderId, Agreement.createInvoiceBankAgreement(userId, true));
+		client.createOrReplaceAgreement(senderId, new Agreement(FETCH_MESSAGES, userId, new HashMap<>()));
 
 		//DeleteAgreement
-		client.deleteAgreement(senderId, INVOICE_BANK, userId);
+		client.deleteAgreement(senderId, FETCH_MESSAGES, userId);
 	}
 
-	public void check_invoice_agreement() {
+	public void check_fetch_messages_agreement() {
 		final SenderId senderId = SenderId.of(1234L);
 		final UserId userId = UserId.of("01017012345");
 
-		final GetAgreementResult agreementResult = client.getAgreement(senderId, INVOICE_BANK, userId);
+		final GetAgreementResult agreementResult = client.getAgreement(senderId, FETCH_MESSAGES, userId);
 		if (agreementResult.isSuccess()) {
 			final Agreement agreement = agreementResult.getAgreement();
 		} else {
@@ -84,33 +87,16 @@ public class Examples {
 		}
 	}
 
-	public void get_invoices() {
+	public void get_messages() {
 		final SenderId senderId = SenderId.of(1234L);
 		final UserId userId = UserId.of("01017012345");
 
-		final List<Document> unpaidInvoice = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.empty());
+		final List<Document> documents = client.getDocuments(senderId, FETCH_MESSAGES, userId, GetDocumentsQuery.empty());
 
-		final List<Document> allOptions = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.builder()
-				.invoiceStatus(InvoiceStatus.PAID)
-				.invoiceDueDateFrom(LocalDate.of(2017, 1, 1))
-				.invoiceDueDateTo(LocalDate.of(2017, 5, 1))
+		final ZoneId OSLO_ZONE = ZoneId.of("Europe/Oslo");
+		final List<Document> allOptions = client.getDocuments(senderId, FETCH_MESSAGES, userId, GetDocumentsQuery.builder()
+				.deliveryTimeFrom(ZonedDateTime.of(2020, 1, 1, 0, 0, 0, 0, OSLO_ZONE))
+				.deliveryTimeTo(ZonedDateTime.now(OSLO_ZONE))
 				.build());
-	}
-
-	public void update_invoice_status() {
-		final SenderId senderId = SenderId.of(1234L);
-		final UserId userId = UserId.of("01017012345");
-
-		final List<Document> unpaidInvoice = client.getDocuments(senderId, INVOICE_BANK, userId, GetDocumentsQuery.empty());
-		final Document invoice = unpaidInvoice.get(0);
-
-		//set status to PAID
-		client.payInvoice(senderId, INVOICE_BANK, invoice.getId(), new InvoicePayment(123));
-
-		//set status to DELETED
-		client.deleteInvoice(senderId, INVOICE_BANK, invoice.getId());
-
-		//generic version
-		client.updateInvoice(senderId, INVOICE_BANK, invoice.getId(), new InvoiceUpdate(InvoiceStatus.PAID, 123));
 	}
 }

@@ -25,6 +25,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 
 import static co.unruly.matchers.OptionalMatchers.contains;
@@ -41,7 +42,7 @@ public class MarshallingTest {
 	public void shouldMarshallUnmarshallAgreement() throws URISyntaxException {
 		final StringWriter xml = new StringWriter();
 		final UserId userId = UserId.of("01017012345");
-		final Agreement agreement = Agreement.createInvoiceBankAgreement(userId, true);
+		final Agreement agreement = new Agreement(AgreementType.FETCH_MESSAGES, userId, new HashMap<>());
 		JAXB.marshal(agreement, xml);
 		log.debug(xml.toString());
 		final Agreement unmarshal = JAXB.unmarshal(new StringReader(xml.toString()), Agreement.class);
@@ -51,7 +52,9 @@ public class MarshallingTest {
 	@Test
 	public void shouldMarshallUnmarshallAgreements() {
 		final StringWriter xml = new StringWriter();
-		final Agreements agreements = new Agreements(singletonList(Agreement.createInvoiceBankAgreement(UserId.of("01017012345"), true)));
+		final UserId userId = UserId.of("01017012345");
+		final Agreement agreement = new Agreement(AgreementType.FETCH_MESSAGES, userId, new HashMap<>());
+		final Agreements agreements = new Agreements(singletonList(agreement));
 		JAXB.marshal(agreements, xml);
 		log.debug(xml.toString());
 		JAXB.unmarshal(new StringReader(xml.toString()), Agreements.class);

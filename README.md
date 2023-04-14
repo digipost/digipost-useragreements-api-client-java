@@ -6,8 +6,6 @@
 
 Online documentation: https://digipost.github.io/digipost-useragreements-api-client-java
 
-API specification: https://github.com/digipost/invoice-api-specification
-
 ## Java Cryptographic Extension
 
 To build and use the API client you need the *Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files for JDK/JRE*

@@ -38,7 +38,6 @@ import java.net.URISyntaxException;
 
 import static java.time.Duration.ofMinutes;
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static no.digipost.api.useragreements.client.Headers.X_Digipost_UserId;
 import static no.digipost.api.useragreements.client.response.ResponseUtils.mapOkResponseOrThrowException;
 import static no.digipost.api.useragreements.client.response.ResponseUtils.unmarshallEntities;
@@ -104,15 +103,6 @@ public class ApiService {
 	}
 
 	private void setGetDocumentsQueryParams(final URIBuilder uriBuilder, final GetDocumentsQuery query) {
-		if (query.getInvoiceStatus() != null) {
-			uriBuilder.setParameter(InvoiceStatus.QUERY_PARAM_NAME, query.getInvoiceStatus().getStatus());
-		}
-		if (query.getInvoiceDueDateFrom() != null) {
-			uriBuilder.setParameter("invoice-due-date-from", query.getInvoiceDueDateFrom().format(ISO_LOCAL_DATE));
-		}
-		if (query.getInvoiceDueDateTo() != null) {
-			uriBuilder.setParameter("invoice-due-date-to", query.getInvoiceDueDateTo().format(ISO_LOCAL_DATE));
-		}
 		if (query.getDeliveryTimeFrom() != null) {
 			uriBuilder.setParameter("delivery-time-from", query.getDeliveryTimeFrom().format(ISO_DATE_TIME));
 		}
@@ -126,13 +116,6 @@ public class ApiService {
 				.setPath(userDocumentsPath(senderId) + "/" + documentId)
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
-	}
-
-	public void updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoiceUpdate invoice, final String requestTrackingId, final ResponseHandler<Void> handler) {
-		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
-				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/invoice")
-				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		executeHttpRequest(newPostRequest(uriBuilder, requestTrackingId, invoice), handler);
 	}
 
 	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<DocumentCount> handler) {
@@ -151,14 +134,10 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationsEnabled, final String requestTrackingId) {
+	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final String requestTrackingId) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId) + "/agreement-owners")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
-		if (smsNotificationsEnabled != null) {
-			uriBuilder
-				.setParameter("invoice-sms-notification", smsNotificationsEnabled.toString());
-		}
 
 		HttpGet request = newGetRequest(uriBuilder, requestTrackingId);
 		request.setHeader(X_Digipost_UserId, brokerId.serialize());

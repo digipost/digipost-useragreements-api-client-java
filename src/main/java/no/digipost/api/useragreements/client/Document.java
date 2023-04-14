@@ -31,8 +31,6 @@ public class Document {
 	@XmlElement(name = "sender-name")
 	private String senderName;
 	@XmlElement
-	private Invoice invoice;
-	@XmlElement
 	private String subject;
 	@XmlElement(name = "delivery-time")
 	private ZonedDateTime deliveryTime;
@@ -45,13 +43,8 @@ public class Document {
 
 	private Document() {}
 
-	public Document(final long id, final Invoice invoice) {
+	public Document(final long id) {
 		this.id = id;
-		this.invoice = invoice;
-	}
-
-	public Invoice getInvoice() {
-		return invoice;
 	}
 
 	public String getSenderName() {
@@ -87,7 +80,6 @@ public class Document {
 		final StringBuilder sb = new StringBuilder("Document{");
 		sb.append("id=").append(id);
 		sb.append(", senderName='").append(senderName).append('\'');
-		sb.append(", invoice=").append(invoice);
 		sb.append(", authenticationLevel=").append(authenticationLevel);
 		sb.append(", deliveryTime=").append(deliveryTime);
 		sb.append('}');
