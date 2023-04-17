@@ -48,6 +48,7 @@ import static no.digipost.cache2.inmemory.CacheConfig.useSoftValues;
 public class ApiService {
 
 	public static final String DIGIPOST_MEDIA_TYPE_USERS_V1 = "application/vnd.digipost.user-v1+xml";
+	public static final String DIGIPOST_MEDIA_TYPE_USERS_V2 = "application/vnd.digipost.user-v2+xml";
 	private static final String USER_DOCUMENTS_PATH = "user-documents";
 	private static final String USER_AGREEMENTS_PATH = "user-agreements";
 
@@ -190,7 +191,7 @@ public class ApiService {
 
 	private HttpPost newPostRequest(final URI uri, String requestTrackingId, Object postBodyEntity) {
 		HttpPost request = withCommonHeaders(new HttpPost(uri), requestTrackingId);
-		request.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		request.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V2);
 		request.setEntity(marshallJaxbEntity(postBodyEntity));
 		return request;
 	}
@@ -204,7 +205,7 @@ public class ApiService {
 	}
 
 	private static <REQ extends HttpRequestBase> REQ withCommonHeaders(REQ request, String requestTrackingId) {
-		request.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
+		request.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V2);
 		return withRequestTrackingHeader(request, requestTrackingId);
 	}
 

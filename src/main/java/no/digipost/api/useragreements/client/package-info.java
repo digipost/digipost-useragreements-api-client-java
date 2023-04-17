@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@XmlSchema(namespace = "http://api.digipost.no/user/schema/v1", elementFormDefault = QUALIFIED)
+@XmlSchema(namespace = "http://api.digipost.no/user/schema/v2", elementFormDefault = QUALIFIED)
 @XmlJavaTypeAdapters({
 		@XmlJavaTypeAdapter(type = Instant.class, value = InstantXmlAdapter.class),
 		@XmlJavaTypeAdapter(type = LocalDate.class, value = DateXmlAdapter.class),
