@@ -18,7 +18,7 @@ For Maven you can use the following dependency:
 <dependency>
     <groupId>no.digipost</groupId>
     <artifactId>digipost-useragreements-api-client-java</artifactId>
-    <version>2.0-delta</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
