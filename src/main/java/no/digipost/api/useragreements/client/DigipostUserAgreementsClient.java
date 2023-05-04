@@ -142,30 +142,6 @@ public class DigipostUserAgreementsClient {
 		return apiService.getDocument(senderId, agreementType, documentId, requestTrackingId, singleJaxbEntityHandler(Document.class));
 	}
 
-	public void payInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoicePayment) {
-		payInvoice(senderId, agreementType, documentId, invoicePayment, null);
-	}
-
-	public void payInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoicePayment invoicePayment, final String requestTrackingId) {
-		apiService.updateInvoice(senderId, agreementType, documentId, invoicePayment.asInvoiceUpdate(), requestTrackingId, voidOkHandler());
-	}
-
-	public void updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoiceUpdate invoiceUpdate) {
-		updateInvoice(senderId, agreementType, documentId, invoiceUpdate, null);
-	}
-
-	public void updateInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final InvoiceUpdate invoiceUpdate, final String requestTrackingId) {
-		apiService.updateInvoice(senderId, agreementType, documentId, invoiceUpdate, requestTrackingId, voidOkHandler());
-	}
-
-	public void deleteInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId) {
-		deleteInvoice(senderId, agreementType, documentId, null);
-	}
-
-	public void deleteInvoice(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId) {
-		apiService.updateInvoice(senderId, agreementType, documentId, new InvoiceUpdate(InvoiceStatus.DELETED), requestTrackingId, voidOkHandler());
-	}
-
 	public long getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query) {
 		return getDocumentCount(senderId, agreementType, userId, query, null);
 	}
@@ -189,14 +165,10 @@ public class DigipostUserAgreementsClient {
 		return getAgreementOwners(senderId, agreementType, null);
 	}
 
-	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled) {
-		return getAgreementOwners(senderId, agreementType, smsNotificationEnabled, null);
-	}
-
-	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final Boolean smsNotificationEnabled, final String requestTrackingId) {
+	public StreamingRateLimitedResponse<UserId> getAgreementOwners(final SenderId senderId, final AgreementType agreementType, final String requestTrackingId) {
 		Objects.requireNonNull(senderId, "senderId cannot be null");
 		Objects.requireNonNull(agreementType, "agreementType cannot be null");
-		return apiService.getAgreementOwners(senderId, agreementType, smsNotificationEnabled, requestTrackingId);
+		return apiService.getAgreementOwners(senderId, agreementType, requestTrackingId);
 	}
 
 	private ResponseHandler<Void> voidOkHandler() {

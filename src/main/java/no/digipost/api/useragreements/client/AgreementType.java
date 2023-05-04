@@ -17,8 +17,6 @@ package no.digipost.api.useragreements.client;
 
 public final class AgreementType {
 
-	public static final AgreementType INVOICE_BANK = new AgreementType("invoice-bank");
-	public static final AgreementType BANK_ACCOUNT_NUMBER_FOR_RECEIPTS = new AgreementType("account-num-for-receipts");
 	public static final AgreementType FETCH_MESSAGES = new AgreementType("fetch-messages");
 
 	public static final String QUERY_PARAM_NAME = "agreement-type";

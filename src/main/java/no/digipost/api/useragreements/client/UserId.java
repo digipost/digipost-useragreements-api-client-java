@@ -18,8 +18,7 @@ package no.digipost.api.useragreements.client;
 import java.util.function.Function;
 
 /**
- * A user id string. May be e.g. a personal identification number (Norwegian national ID number),
- * or a bank account number.
+ * A user id string. May be e.g. a personal identification number (Norwegian national ID number).
  */
 public class UserId extends JustA<String> {
 

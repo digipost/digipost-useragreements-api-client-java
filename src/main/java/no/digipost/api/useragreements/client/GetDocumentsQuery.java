@@ -16,35 +16,16 @@
 package no.digipost.api.useragreements.client;
 
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
 public class GetDocumentsQuery {
-	private final InvoiceStatus invoiceStatus;
-	private final LocalDate invoiceDueDateFrom;
-	private final LocalDate invoiceDueDateTo;
 	private final OffsetDateTime deliveryTimeFrom;
 	private final OffsetDateTime deliveryTimeTo;
 
 	private GetDocumentsQuery(final Builder builder) {
-		this.invoiceStatus = builder.invoiceStatus;
-		this.invoiceDueDateFrom = builder.invoiceDueDateFrom;
-		this.invoiceDueDateTo = builder.invoiceDueDateTo;
 		this.deliveryTimeFrom = builder.deliveryTimeFrom;
 		this.deliveryTimeTo = builder.deliveryTimeTo;
-	}
-
-	public InvoiceStatus getInvoiceStatus() {
-		return invoiceStatus;
-	}
-
-	public LocalDate getInvoiceDueDateFrom() {
-		return invoiceDueDateFrom;
-	}
-
-	public LocalDate getInvoiceDueDateTo() {
-		return invoiceDueDateTo;
 	}
 
 	public OffsetDateTime getDeliveryTimeFrom() {
@@ -64,28 +45,10 @@ public class GetDocumentsQuery {
 	}
 
 	public static class Builder {
-		private InvoiceStatus invoiceStatus;
-		private LocalDate invoiceDueDateFrom;
-		private LocalDate invoiceDueDateTo;
 		private OffsetDateTime deliveryTimeFrom;
 		private OffsetDateTime deliveryTimeTo;
 
 		private Builder() {}
-
-		public Builder invoiceStatus(final InvoiceStatus invoiceStatus) {
-			this.invoiceStatus = invoiceStatus;
-			return this;
-		}
-
-		public Builder invoiceDueDateFrom(final LocalDate invoiceDueDateFrom) {
-			this.invoiceDueDateFrom = invoiceDueDateFrom;
-			return this;
-		}
-
-		public Builder invoiceDueDateTo(final LocalDate invoiceDueDateTo) {
-			this.invoiceDueDateTo = invoiceDueDateTo;
-			return this;
-		}
 
 		public Builder deliveryTimeFrom(final OffsetDateTime deliveryTimeFrom) {
 			this.deliveryTimeFrom = deliveryTimeFrom;

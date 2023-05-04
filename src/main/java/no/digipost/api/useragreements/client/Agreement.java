@@ -49,12 +49,6 @@ public class Agreement {
 		this.attributes = attributes == null ? new HashMap<String, String>() : attributes;
 	}
 
-	public static Agreement createInvoiceBankAgreement(final UserId userId, final boolean smsNotification) {
-		HashMap<String, String> attribs = new HashMap<>();
-		attribs.put("sms-notification", String.valueOf(smsNotification));
-		return new Agreement(AgreementType.INVOICE_BANK, userId, attribs);
-	}
-
 	public AgreementType getType() {
 		return type;
 	}
