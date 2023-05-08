@@ -191,7 +191,7 @@ public class ApiService {
 
 	private HttpPost newPostRequest(final URI uri, String requestTrackingId, Object postBodyEntity) {
 		HttpPost request = withCommonHeaders(new HttpPost(uri), requestTrackingId);
-		request.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V2);
+		request.setHeader(HttpHeaders.CONTENT_TYPE, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		request.setEntity(marshallJaxbEntity(postBodyEntity));
 		return request;
 	}
@@ -205,7 +205,7 @@ public class ApiService {
 	}
 
 	private static <REQ extends HttpRequestBase> REQ withCommonHeaders(REQ request, String requestTrackingId) {
-		request.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V2);
+		request.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V1);
 		return withRequestTrackingHeader(request, requestTrackingId);
 	}
 
