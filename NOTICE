@@ -28,7 +28,7 @@ This software includes third party software subject to the following licenses:
   Guava ListenableFuture only under The Apache Software License, Version 2.0
   Guava: Google Core Libraries for Java under Apache License, Version 2.0
   istack common utility code runtime under Eclipse Distribution License - v 1.0
-  J2ObjC Annotations under The Apache Software License, Version 2.0
+  J2ObjC Annotations under Apache License, Version 2.0
   jakarta.xml.bind-api under Eclipse Distribution License - v 1.0
   JavaBeans Activation Framework API jar under EDL 1.0
   JAXB Runtime under Eclipse Distribution License - v 1.0
