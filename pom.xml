@@ -35,7 +35,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 
-		<bouncycastle.version>1.70</bouncycastle.version>
+		<bouncycastle.version>1.77</bouncycastle.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<jaxb.version>2.3.2</jaxb.version>
 	</properties>
@@ -107,12 +107,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
+			<artifactId>bcprov-jdk18on</artifactId>
 			<version>${bouncycastle.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
+			<artifactId>bcpkix-jdk18on</artifactId>
 			<version>${bouncycastle.version}</version>
 		</dependency>
 		<dependency>
@@ -373,9 +373,9 @@
 										<exclude>*:*:*:jar:compile</exclude>
 									</excludes>
 									<includes>
-										<include>org.bouncycastle:bcprov-jdk15on:${bouncycastle.version}:jar:compile</include>
-										<include>org.bouncycastle:bcpkix-jdk15on:${bouncycastle.version}:jar:compile</include>
-										<include>org.bouncycastle:bcutil-jdk15on:${bouncycastle.version}:jar:compile</include>
+										<include>org.bouncycastle:bcprov-jdk18on:${bouncycastle.version}:jar:compile</include>
+										<include>org.bouncycastle:bcpkix-jdk18on:${bouncycastle.version}:jar:compile</include>
+										<include>org.bouncycastle:bcutil-jdk18on:${bouncycastle.version}:jar:compile</include>
 										<include>org.apache.commons:commons-lang3</include>
 										<include>jakarta.xml.bind:jakarta.xml.bind-api</include>
 										<include>jakarta.activation:jakarta.activation-api</include>
