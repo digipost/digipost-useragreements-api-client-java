@@ -37,7 +37,7 @@ jobs:
           else
             TAG=${GITHUB_REF#refs/heads/}-SNAPSHOT
           fi
-          echo ::set-output name=version::${TAG//\//-}
+          echo "version=${TAG//\//-}" >> $GITHUB_OUTPUT
 
   deploy_snapshot:
     if: startsWith(github.ref, 'refs/heads/')
