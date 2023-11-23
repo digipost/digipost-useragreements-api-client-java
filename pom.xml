@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>no.digipost</groupId>
 		<artifactId>digipost-open-super-pom</artifactId>
-		<version>7</version>
+		<version>13</version>
 	</parent>
 
 	<artifactId>digipost-useragreements-api-client-java</artifactId>
