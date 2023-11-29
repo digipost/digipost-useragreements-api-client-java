@@ -22,17 +22,16 @@
 })
 package no.digipost.api.useragreements.client;
 
+import jakarta.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import no.digipost.api.useragreements.client.xml.DateXmlAdapter;
 import no.digipost.api.useragreements.client.xml.InstantXmlAdapter;
 import no.digipost.api.useragreements.client.xml.UserIdXmlAdapter;
 import no.digipost.api.useragreements.client.xml.ZonedDateTImeXmlAdapter;
 
-import javax.xml.bind.annotation.XmlSchema;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
-import static javax.xml.bind.annotation.XmlNsForm.QUALIFIED;
+import static jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED;

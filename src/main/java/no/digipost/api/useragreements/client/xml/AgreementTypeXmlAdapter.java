@@ -15,9 +15,8 @@
  */
 package no.digipost.api.useragreements.client.xml;
 
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import no.digipost.api.useragreements.client.AgreementType;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class AgreementTypeXmlAdapter extends XmlAdapter<String,AgreementType> {
     @Override

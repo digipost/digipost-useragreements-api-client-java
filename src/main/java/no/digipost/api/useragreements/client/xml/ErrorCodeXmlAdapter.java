@@ -15,9 +15,8 @@
  */
 package no.digipost.api.useragreements.client.xml;
 
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import no.digipost.api.useragreements.client.ErrorCode;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class ErrorCodeXmlAdapter extends XmlAdapter<String, ErrorCode> {
     @Override

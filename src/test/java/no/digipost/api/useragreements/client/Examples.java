@@ -20,7 +20,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;

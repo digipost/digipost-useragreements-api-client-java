@@ -15,11 +15,10 @@
  */
 package no.digipost.api.useragreements.client;
 
+import jakarta.xml.bind.JAXB;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.xml.bind.JAXB;
 
 import java.io.StringReader;
 import java.io.StringWriter;
