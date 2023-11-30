@@ -15,7 +15,8 @@
  */
 package no.digipost.api.useragreements.client.xml;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
+
 import java.time.ZonedDateTime;
 
 import static java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;

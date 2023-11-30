@@ -15,6 +15,7 @@
  */
 package no.digipost.api.useragreements.client;
 
+import jakarta.xml.bind.JAXB;
 import no.digipost.api.useragreements.client.response.StreamingRateLimitedResponse;
 import no.digipost.cache2.inmemory.SingleCached;
 import org.apache.http.HttpEntity;
@@ -28,8 +29,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-
-import javax.xml.bind.JAXB;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

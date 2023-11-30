@@ -15,10 +15,10 @@
  */
 package no.digipost.api.useragreements.client.xml;
 
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import no.digipost.api.useragreements.client.Attribute;
 import no.digipost.api.useragreements.client.Attributes;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;

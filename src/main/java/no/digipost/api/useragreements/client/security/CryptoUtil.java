@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLServerSocketFactory;
-
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;

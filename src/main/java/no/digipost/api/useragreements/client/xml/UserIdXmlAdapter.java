@@ -15,9 +15,8 @@
  */
 package no.digipost.api.useragreements.client.xml;
 
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import no.digipost.api.useragreements.client.UserId;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class UserIdXmlAdapter extends XmlAdapter<String, UserId> {
     @Override

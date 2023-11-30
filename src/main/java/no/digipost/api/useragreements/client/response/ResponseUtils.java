@@ -15,6 +15,8 @@
  */
 package no.digipost.api.useragreements.client.response;
 
+import jakarta.xml.bind.DataBindingException;
+import jakarta.xml.bind.JAXB;
 import no.digipost.api.useragreements.client.Error;
 import no.digipost.api.useragreements.client.ErrorCode;
 import no.digipost.api.useragreements.client.Headers;
@@ -26,9 +28,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.xml.bind.DataBindingException;
-import javax.xml.bind.JAXB;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
