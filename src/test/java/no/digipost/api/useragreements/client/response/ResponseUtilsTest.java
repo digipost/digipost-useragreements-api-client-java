@@ -16,10 +16,8 @@
 package no.digipost.api.useragreements.client.response;
 
 import no.digipost.api.useragreements.client.Headers;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.message.BasicHttpResponse;
-import org.apache.http.message.BasicStatusLine;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.message.BasicHttpResponse;
 import org.junit.Test;
 
 import java.time.Clock;
@@ -85,7 +83,7 @@ public class ResponseUtilsTest {
 
 
 	private static HttpResponse tooManyRequestsResponseWithRetryAfter(String retryAfterValue) {
-		HttpResponse tooManyRequestsErrorResponse = new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("http", 1, 1), 429, "Too Many Requests"));
+		HttpResponse tooManyRequestsErrorResponse = new BasicHttpResponse(429);
 		tooManyRequestsErrorResponse.addHeader(Headers.Retry_After, retryAfterValue);
 		return tooManyRequestsErrorResponse;
 	}

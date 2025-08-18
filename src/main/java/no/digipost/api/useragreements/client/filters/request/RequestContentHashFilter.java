@@ -15,7 +15,7 @@
  */
 package no.digipost.api.useragreements.client.filters.request;
 
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequest;
 import org.bouncycastle.crypto.ExtendedDigest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -22,10 +22,11 @@ import no.digipost.api.useragreements.client.ErrorCode;
 import no.digipost.api.useragreements.client.Headers;
 import no.digipost.api.useragreements.client.RuntimeIOException;
 import no.digipost.api.useragreements.client.UnexpectedResponseException;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +60,7 @@ public final class ResponseUtils {
 
 
 	public static <T> T mapOkResponseOrThrowException(HttpResponse response, Function<HttpResponse, T> okResponseMapper) {
-		final StatusLine statusLine = response.getStatusLine();
+		final StatusLine statusLine = new StatusLine(response);
 		if (isOkResponse(statusLine.getStatusCode())) {
 			return okResponseMapper.apply(response);
 		} else if (statusLine.getStatusCode() == 429) { // Too Many Requests
@@ -82,12 +83,12 @@ public final class ResponseUtils {
 		try (Stream<T> entityStream = unmarshallEntities(response, returnType)) {
 			Iterator<T> entityIterator = entityStream.limit(2).iterator();
 			if (!entityIterator.hasNext()) {
-				throw new UnexpectedResponseException(response.getStatusLine(), NO_ENTITY,
+				throw new UnexpectedResponseException(new StatusLine(response), NO_ENTITY,
 						"Message body is empty");
 			}
 			T theEntity = entityIterator.next();
 			if (entityIterator.hasNext()) {
-				throw new UnexpectedResponseException(response.getStatusLine(), MULTIPLE_ENTITIES,
+				throw new UnexpectedResponseException(new StatusLine(response), MULTIPLE_ENTITIES,
 						"Message body contained more than one entity. First: " + theEntity + ", first excess one: " + entityIterator.next());
 			}
 			return theEntity;
@@ -104,7 +105,7 @@ public final class ResponseUtils {
 					try {
 						return JAXB.unmarshal(new ByteArrayInputStream(xml.getBytes()), returnType);
 					} catch (IllegalStateException | DataBindingException e) {
-						throw new UnexpectedResponseException(response.getStatusLine(), ErrorCode.GENERAL_ERROR, xml, e);
+						throw new UnexpectedResponseException(new StatusLine(response), ErrorCode.GENERAL_ERROR, xml, e);
 					}
 				});
 	}
@@ -115,16 +116,16 @@ public final class ResponseUtils {
 
 	public static InputStream getResponseEntityContent(HttpResponse response) {
 		Optional<CloseableHttpResponse> closeableResponse = Optional.of(response).filter(r -> r instanceof CloseableHttpResponse).map(r -> (CloseableHttpResponse) r);
-		StatusLine statusLine = response.getStatusLine();
-		HttpEntity entity = response.getEntity();
+		StatusLine statusLine = new StatusLine(response);
+		try {
+			HttpEntity entity = ((ClassicHttpResponse) response).getEntity();
 		if (entity == null) {
 			closeableResponse.flatMap(r -> close(r)).map(RuntimeIOException::from).ifPresent(e -> { throw e; });
 			return null;
 		}
 
-		try {
 			return entity.getContent();
-		} catch (UnsupportedOperationException | IOException e) {
+		} catch (UnsupportedOperationException | IOException | ClassCastException e) {
 			UnexpectedResponseException mainException = new UnexpectedResponseException(statusLine, ErrorCode.GENERAL_ERROR, e.getMessage(), e);
 			closeableResponse.flatMap(r -> close(r)).ifPresent(mainException::addSuppressed);
 			throw mainException;
@@ -187,7 +188,7 @@ public final class ResponseUtils {
 
 
 	public static boolean isOkResponse(HttpResponse response) {
-		return isOkResponse(response.getStatusLine());
+		return isOkResponse(new StatusLine(response));
 	}
 
 	public static boolean isOkResponse(StatusLine status) {

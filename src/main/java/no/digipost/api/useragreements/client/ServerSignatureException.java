@@ -15,7 +15,8 @@
  */
 package no.digipost.api.useragreements.client;
 
-import org.apache.http.StatusLine;
+
+import org.apache.hc.core5.http.message.StatusLine;
 
 public class ServerSignatureException extends UnexpectedResponseException {
 	public ServerSignatureException(final StatusLine status, final String errorMessage) {

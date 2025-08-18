@@ -15,7 +15,8 @@
  */
 package no.digipost.api.useragreements.client.filters.request;
 
-import org.apache.http.HttpHeaders;
+
+import org.apache.hc.core5.http.HttpHeaders;
 
 import java.util.Arrays;
 import java.util.List;

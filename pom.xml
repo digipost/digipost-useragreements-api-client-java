@@ -23,7 +23,7 @@
 	<parent>
 		<groupId>no.digipost</groupId>
 		<artifactId>digipost-open-super-pom</artifactId>
-		<version>14</version>
+		<version>15</version>
 	</parent>
 
 	<artifactId>digipost-useragreements-api-client-java</artifactId>
@@ -76,25 +76,29 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.14</version>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<version>5.4.4</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.apache.httpcomponents.core5</groupId>
+					<artifactId>httpcore5-h2</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.4.16</version>
+			<groupId>org.apache.httpcomponents.core5</groupId>
+			<artifactId>httpcore5</artifactId>
+			<version>5.3.4</version>
 		</dependency>
 		<dependency>
 			<groupId>no.digipost</groupId>
-			<artifactId>http-client-builder3</artifactId>
-			<version>3.0.1</version>
+			<artifactId>http-client-builder5</artifactId>
+			<version>5.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -370,10 +374,10 @@
 										<include>org.checkerframework:checker-compat-qual</include>
 										<include>org.codehaus.mojo:animal-sniffer-annotations</include>
 										<include>com.google.errorprone:error_prone_annotations</include>
-										<include>no.digipost:http-client-builder3</include>
-										<include>org.apache.httpcomponents:httpclient</include>
+										<include>no.digipost:http-client-builder5</include>
+										<include>org.apache.httpcomponents.client5:httpclient5</include>
 										<include>commons-codec:commons-codec</include>
-										<include>org.apache.httpcomponents:httpcore</include>
+										<include>org.apache.httpcomponents.core5:httpcore5</include>
 										<include>org.jboss.logging:jboss-logging</include>
 										<include>org.jboss.xnio:xnio-api</include>
 									</includes>
