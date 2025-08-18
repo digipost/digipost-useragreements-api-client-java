@@ -16,12 +16,11 @@
 package no.digipost.api.useragreements.client.filters.response;
 
 import no.digipost.api.useragreements.client.ServerSignatureException;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,11 +49,16 @@ public class ResponseDateInterceptorTest {
 	private HttpContext httpContextMock;
 
 	@Mock
+	private EntityDetails entityDetailsMock;
+
+	@Mock
 	private HttpResponse httpResponseMock;
 
 	@Before
 	public void setUp() {
-		when(httpResponseMock.getStatusLine()).thenReturn(new StatusLineMock(200));
+		when(httpResponseMock.getCode()).thenReturn(200);
+		when(httpResponseMock.getReasonPhrase()).thenReturn(null);
+		when(httpResponseMock.getVersion()).thenReturn(null);
 	}
 
 	@Test
@@ -62,7 +66,7 @@ public class ResponseDateInterceptorTest {
 		ResponseDateInterceptor interceptor = new ResponseDateInterceptor();
 		expectedException.expect(ServerSignatureException.class);
 		expectedException.expectMessage(containsString("Respons mangler Date-header"));
-		interceptor.process(httpResponseMock, httpContextMock);
+		interceptor.process(httpResponseMock, entityDetailsMock, httpContextMock);
 	}
 
 	@Test
@@ -71,7 +75,7 @@ public class ResponseDateInterceptorTest {
 		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "16. januar 2012 - 16:14:23"));
 		expectedException.expect(ServerSignatureException.class);
 		expectedException.expectMessage(containsString("Date-header kunne ikke parses"));
-		interceptor.process(httpResponseMock, httpContextMock);
+		interceptor.process(httpResponseMock, entityDetailsMock, httpContextMock);
 	}
 
 	@Test
@@ -80,7 +84,7 @@ public class ResponseDateInterceptorTest {
 		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
 		expectedException.expect(ServerSignatureException.class);
 		expectedException.expectMessage(containsString("Date-header fra server er for ny"));
-		interceptor.process(httpResponseMock, httpContextMock);
+		interceptor.process(httpResponseMock, entityDetailsMock, httpContextMock);
 	}
 
 	@Test
@@ -89,29 +93,6 @@ public class ResponseDateInterceptorTest {
 		when(httpResponseMock.getFirstHeader("Date")).thenReturn(new BasicHeader("Date", "Tue, 04 Nov 2014 21:10:58 GMT"));
 		expectedException.expect(ServerSignatureException.class);
 		expectedException.expectMessage(containsString("Date-header fra server er for gammel"));
-		interceptor.process(httpResponseMock, httpContextMock);
-	}
-
-	public static class StatusLineMock implements StatusLine {
-
-		private final int statusCode;
-		public StatusLineMock(int statusCode){
-			this.statusCode = statusCode;
-		}
-
-		@Override
-		public ProtocolVersion getProtocolVersion() {
-			return null;
-		}
-
-		@Override
-		public int getStatusCode() {
-			return statusCode;
-		}
-
-		@Override
-		public String getReasonPhrase() {
-			return null;
-		}
+		interceptor.process(httpResponseMock, entityDetailsMock, httpContextMock);
 	}
 }

@@ -15,10 +15,10 @@
  */
 package no.digipost.api.useragreements.client.filters.request;
 
-import org.apache.http.Header;
-import org.apache.http.HttpRequest;
 
-import java.net.URI;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpRequest;
+
 import java.net.URISyntaxException;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -33,13 +33,13 @@ final class RequestToSign {
 
 
 	public String getMethod() {
-		return clientRequest.getRequestLine().getMethod();
+		return clientRequest.getMethod();
 	}
 
 
 	public SortedMap<String, String> getHeaders() {
 		TreeMap<String, String> sortedHeaders = new TreeMap<String, String>();
-		Header[] headers = clientRequest.getAllHeaders();
+		Header[] headers = clientRequest.getHeaders();
 		for (Header header : headers) {
 			sortedHeaders.put(header.getName(), header.getValue());
 		}
@@ -48,17 +48,17 @@ final class RequestToSign {
 
 
 	public String getPath() {
-		try {
-			String path = new URI(clientRequest.getRequestLine().getUri()).getPath();
-			return path != null ? path : "";
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
+		String path = clientRequest.getPath();
+		return path != null ? path : "";
 	}
 
 
 	public String getParameters() {
-		return queryParametersFromURI(clientRequest.getRequestLine().getUri());
+		try {
+			return queryParametersFromURI(clientRequest.getUri().toString());
+		} catch (URISyntaxException e) {
+			return "";
+		}
 	}
 
 	static String queryParametersFromURI(String uri){

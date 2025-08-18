@@ -17,10 +17,13 @@ package no.digipost.api.useragreements.client.filters.response;
 
 import no.digipost.api.useragreements.client.ServerSignatureException;
 import no.digipost.api.useragreements.client.util.DateUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.message.StatusLine;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 import java.time.Clock;
 import java.time.ZonedDateTime;
@@ -28,7 +31,6 @@ import java.time.format.DateTimeParseException;
 
 import static java.time.ZonedDateTime.now;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.http.HttpHeaders.DATE;
 
 public class ResponseDateInterceptor implements HttpResponseInterceptor {
 
@@ -44,9 +46,9 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 	}
 
 	@Override
-	public void process(HttpResponse response, HttpContext context) {
+	public void process(HttpResponse response, EntityDetails entityDetails, HttpContext context) {
 		String dateHeader = null;
-		Header firstHeader = response.getFirstHeader(DATE);
+		Header firstHeader = response.getFirstHeader(HttpHeaders.DATE);
 		if(firstHeader != null){
 			dateHeader = firstHeader.getValue();
 		}
@@ -54,7 +56,7 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 		if (isNotBlank(dateHeader)) {
 			sjekkDato(dateHeader, response);
 		} else {
-			throw new ServerSignatureException(response.getStatusLine(), "Respons mangler Date-header");
+			throw new ServerSignatureException(new StatusLine(response), "Respons mangler Date-header");
 		}
 	}
 
@@ -64,19 +66,19 @@ public class ResponseDateInterceptor implements HttpResponseInterceptor {
 			sjekkAtDatoHeaderIkkeErForGammel(dateOnRFC1123Format, date, response);
 			sjekkAtDatoHeaderIkkeErForNy(dateOnRFC1123Format, date, response);
 		} catch (DateTimeParseException e) {
-			throw new ServerSignatureException(response.getStatusLine(), "Date-header kunne ikke parses: " + e.getMessage(), e);
+			throw new ServerSignatureException(new StatusLine(response), "Date-header kunne ikke parses: " + e.getMessage(), e);
 		}
 	}
 
 	private void sjekkAtDatoHeaderIkkeErForGammel(final String headerDate, final ZonedDateTime parsedDate, HttpResponse response) {
 		if (parsedDate.isBefore(now(clock).minusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
-			throw new ServerSignatureException(response.getStatusLine(), "Date-header fra server er for gammel: " + headerDate);
+			throw new ServerSignatureException(new StatusLine(response), "Date-header fra server er for gammel: " + headerDate);
 		}
 	}
 
 	private void sjekkAtDatoHeaderIkkeErForNy(final String headerDate, final ZonedDateTime parsedDate, HttpResponse response) {
 		if (parsedDate.isAfter(now(clock).plusMinutes(AKSEPTABEL_TIDSDIFFERANSE_MINUTTER))) {
-			throw new ServerSignatureException(response.getStatusLine(), "Date-header fra server er for ny: " + headerDate);
+			throw new ServerSignatureException(new StatusLine(response), "Date-header fra server er for ny: " + headerDate);
 		}
 	}
 }

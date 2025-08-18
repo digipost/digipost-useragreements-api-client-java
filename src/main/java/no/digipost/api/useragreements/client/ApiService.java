@@ -18,17 +18,19 @@ package no.digipost.api.useragreements.client;
 import jakarta.xml.bind.JAXB;
 import no.digipost.api.useragreements.client.response.StreamingRateLimitedResponse;
 import no.digipost.cache2.inmemory.SingleCached;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.net.URIBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -61,15 +63,15 @@ public class ApiService {
 		this.httpClient = httpClient;
 	}
 
-	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId, final ResponseHandler<IdentificationResult> handler) {
+	public IdentificationResult identifyUser(final SenderId senderId, final UserId userId, final String requestTrackingId, final HttpClientResponseHandler<IdentificationResult> handler) {
 		return executeHttpRequest(newPostRequest(getEntryPoint().getIdentificationUri(), requestTrackingId, new Identification(userId.serialize())), handler);
 	}
 
-	public void createAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId, final ResponseHandler<Void> handler) {
+	public void createAgreement(final SenderId senderId, final Agreement agreement, final String requestTrackingId, final HttpClientResponseHandler<Void> handler) {
 		executeHttpRequest(newPostRequest(new URIBuilder(serviceEndpoint).setPath(userAgreementsPath(senderId)), requestTrackingId, agreement), handler);
 	}
 
-	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<GetAgreementResult> handler) {
+	public GetAgreementResult getAgreement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final HttpClientResponseHandler<GetAgreementResult> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
 				.setParameter("user-id", userId.serialize())
@@ -77,14 +79,14 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public Agreements getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId, final ResponseHandler<Agreements> handler) {
+	public Agreements getAgreements(final SenderId senderId, final UserId userId, final String requestTrackingId, final HttpClientResponseHandler<Agreements> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
 				.setParameter("user-id", userId.serialize());
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public void deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final ResponseHandler<Void> handler) {
+	public void deleteAgrement(final SenderId senderId, final AgreementType agreementType, final UserId userId, final String requestTrackingId, final HttpClientResponseHandler<Void> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userAgreementsPath(senderId))
 				.setParameter("user-id", userId.serialize())
@@ -93,7 +95,7 @@ public class ApiService {
 		executeHttpRequest(withRequestTrackingHeader(deleteAgreementRequest, requestTrackingId), handler);
 	}
 
-	public Documents getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<Documents> handler) {
+	public Documents getDocuments(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final HttpClientResponseHandler<Documents> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId))
 				.setParameter(UserId.QUERY_PARAM_NAME, userId.serialize())
@@ -111,14 +113,14 @@ public class ApiService {
 		}
 	}
 
-	public Document getDocument(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId, final ResponseHandler<Document> handler) {
+	public Document getDocument(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId, final HttpClientResponseHandler<Document> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId)
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final ResponseHandler<DocumentCount> handler) {
+	public DocumentCount getDocumentCount(final SenderId senderId, final AgreementType agreementType, final UserId userId, final GetDocumentsQuery query, final String requestTrackingId, final HttpClientResponseHandler<DocumentCount> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/count")
 				.setParameter(UserId.QUERY_PARAM_NAME, userId.serialize())
@@ -127,7 +129,7 @@ public class ApiService {
 		return executeHttpRequest(newGetRequest(uriBuilder, requestTrackingId), handler);
 	}
 
-	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId, final ResponseHandler<DocumentContent> handler) {
+	public DocumentContent getDocumentContent(final SenderId senderId, final AgreementType agreementType, final long documentId, final String requestTrackingId, final HttpClientResponseHandler<DocumentContent> handler) {
 		URIBuilder uriBuilder = new URIBuilder(serviceEndpoint)
 				.setPath(userDocumentsPath(senderId) + "/" + documentId + "/content")
 				.setParameter(AgreementType.QUERY_PARAM_NAME, agreementType.getType());
@@ -167,7 +169,7 @@ public class ApiService {
 		return "/" + senderId.serialize() + "/" + USER_DOCUMENTS_PATH;
 	}
 
-	private <T> T executeHttpRequest(final HttpRequestBase request, final ResponseHandler<T> handler) {
+	private <T> T executeHttpRequest(final ClassicHttpRequest request, final HttpClientResponseHandler<T> handler) {
 		try {
 			request.setHeader(X_Digipost_UserId, brokerId.serialize());
 			return httpClient.execute(request, handler);
@@ -203,12 +205,12 @@ public class ApiService {
 		}
 	}
 
-	private static <REQ extends HttpRequestBase> REQ withCommonHeaders(REQ request, String requestTrackingId) {
+	private static <REQ extends HttpRequest> REQ withCommonHeaders(REQ request, String requestTrackingId) {
 		request.setHeader(HttpHeaders.ACCEPT, DIGIPOST_MEDIA_TYPE_USERS_V2);
 		return withRequestTrackingHeader(request, requestTrackingId);
 	}
 
-	private static <REQ extends HttpRequestBase> REQ withRequestTrackingHeader(REQ request, final String requestTrackingId) {
+	private static <REQ extends HttpRequest> REQ withRequestTrackingHeader(REQ request, final String requestTrackingId) {
 		if (requestTrackingId != null && !requestTrackingId.isEmpty()) {
 			request.setHeader("X-Digipost-Request-Id", requestTrackingId);
 		}
@@ -218,7 +220,7 @@ public class ApiService {
 	private static HttpEntity marshallJaxbEntity(final Object obj) {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream(1024);
 		JAXB.marshal(obj, bao);
-		return new ByteArrayEntity(bao.toByteArray());
+		return new ByteArrayEntity(bao.toByteArray(), ContentType.APPLICATION_XML);
 	}
 
 	public EntryPoint getEntryPoint() {

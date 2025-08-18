@@ -15,7 +15,8 @@
  */
 package no.digipost.api.useragreements.client;
 
-import org.apache.http.StatusLine;
+
+import org.apache.hc.core5.http.message.StatusLine;
 
 import static java.lang.String.format;
 

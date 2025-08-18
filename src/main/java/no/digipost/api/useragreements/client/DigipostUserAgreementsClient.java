@@ -23,16 +23,13 @@ import no.digipost.api.useragreements.client.filters.response.ResponseDateInterc
 import no.digipost.api.useragreements.client.response.StreamingRateLimitedResponse;
 import no.digipost.api.useragreements.client.security.CryptoUtil;
 import no.digipost.api.useragreements.client.security.PrivateKeySigner;
-import no.digipost.http.client3.DigipostHttpClientFactory;
-import no.digipost.http.client3.DigipostHttpClientSettings;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContextBuilder;
+import no.digipost.http.client.HttpClientFactory;
+import no.digipost.http.client.HttpClientSettings;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.message.StatusLine;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -89,7 +86,7 @@ public class DigipostUserAgreementsClient {
 		Objects.requireNonNull(type, "agreementType cannot be null");
 		Objects.requireNonNull(userId, "userId cannot be null");
 		return apiService.getAgreement(senderId, type, userId, requestTrackingId, response -> {
-			StatusLine status = response.getStatusLine();
+			StatusLine status = new StatusLine(response);
 			if (isOkResponse(status.getStatusCode())) {
 				return new GetAgreementResult(unmarshallEntity(response, Agreement.class));
 			} else {
@@ -171,11 +168,11 @@ public class DigipostUserAgreementsClient {
 		return apiService.getAgreementOwners(senderId, agreementType, requestTrackingId);
 	}
 
-	private ResponseHandler<Void> voidOkHandler() {
+	private HttpClientResponseHandler<Void> voidOkHandler() {
 		return response -> mapOkResponseOrThrowException(response, r -> null);
 	}
 
-	private <T> ResponseHandler<T> singleJaxbEntityHandler(Class<T> responseType) {
+	private <T> HttpClientResponseHandler<T> singleJaxbEntityHandler(Class<T> responseType) {
 		return response -> mapOkResponseOrThrowException(response, r -> unmarshallEntity(r, responseType));
 	}
 
@@ -208,7 +205,7 @@ public class DigipostUserAgreementsClient {
 			this.certificatePassword = certificatePassword;
 			this.privateKey = Optional.ofNullable(privateKey);
 			serviceEndpoint(PRODUCTION_ENDPOINT);
-			httpClientBuilder = DigipostHttpClientFactory.createBuilder(DigipostHttpClientSettings.DEFAULT);
+			httpClientBuilder = HttpClientFactory.createBuilder(HttpClientSettings.DEFAULT);
 		}
 
 		public Builder useProxy(final HttpHost proxyHost) {
@@ -226,30 +223,14 @@ public class DigipostUserAgreementsClient {
             return this;
         }
 
-		public Builder veryDangerouslyDisableCertificateVerificationWhichIsAbsolutelyUnfitForProductionCode() {
-			if (this.serviceEndpoint.compareTo(PRODUCTION_ENDPOINT) == 0) {
-				throw new RuntimeException("You should never ever disable certificate verification when connecting to the production endpoint");
-			}
-			SSLContextBuilder sslContextBuilder= new SSLContextBuilder();
-			try {
-				sslContextBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build(), (hostname, session) -> true);
-				httpClientBuilder.setSSLSocketFactory(sslConnectionSocketFactory);
-			} catch (Exception e) {
-				throw new RuntimeException("Could not disable certificate verification: " + e.getMessage(), e);
-			}
-			System.err.println("Not checking validity of certificates for any hostnames");
-			return this;
-		}
-
 		public DigipostUserAgreementsClient build() {
 			CryptoUtil.addBouncyCastleProviderAndVerify_AES256_CBC_Support();
 
-			httpClientBuilder.addInterceptorLast(new RequestDateInterceptor());
-			httpClientBuilder.addInterceptorLast(new RequestUserAgentInterceptor());
+			httpClientBuilder.addRequestInterceptorLast(new RequestDateInterceptor());
+			httpClientBuilder.addRequestInterceptorLast(new RequestUserAgentInterceptor());
 			PrivateKeySigner pkSigner = privateKey.map(PrivateKeySigner::new).orElseGet(() -> new PrivateKeySigner(certificateP12File, certificatePassword));
-			httpClientBuilder.addInterceptorLast(new RequestSignatureInterceptor(pkSigner, new RequestContentSHA256Filter()));
-			httpClientBuilder.addInterceptorLast(new ResponseDateInterceptor());
+			httpClientBuilder.addRequestInterceptorLast(new RequestSignatureInterceptor(pkSigner, new RequestContentSHA256Filter()));
+			httpClientBuilder.addResponseInterceptorLast(new ResponseDateInterceptor());
 			proxyHost.ifPresent(httpClientBuilder::setProxy);
 
 			ApiService apiService = new ApiService(serviceEndpoint, brokerId, httpClientBuilder.build());

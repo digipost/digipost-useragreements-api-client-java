@@ -15,8 +15,9 @@
  */
 package no.digipost.api.useragreements.client;
 
-import org.apache.http.HttpHost;
-import org.apache.http.impl.client.HttpClientBuilder;
+
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpHost;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -34,7 +35,7 @@ public class Examples {
 	public void instantiate_client() {
 		InputStream key = getClass().getResourceAsStream("certificate.p12");
 
-		HttpHost proxy = new HttpHost("proxy.example.com", 8080, "http");
+		HttpHost proxy = new HttpHost("proxy.example.com", 8080);
 
 		final BrokerId brokerId = BrokerId.of(1234L);
 
