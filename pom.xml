@@ -163,17 +163,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>1.23.0</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<build>
 		<resources>
 			<resource>
@@ -360,7 +349,6 @@
 										<include>org.apache.commons:commons-lang3</include>
 										<include>jakarta.xml.bind:jakarta.xml.bind-api</include>
 										<include>jakarta.activation:jakarta.activation-api</include>
-										<include>org.javassist:javassist:*:jar:test</include>
 										<include>org.slf4j:slf4j-api:*:jar:compile</include>
 										<include>org.slf4j:slf4j-simple:*:jar:test</include>
 										<include>no.digipost:digipost-cache</include>
@@ -369,18 +357,12 @@
 										<include>com.google.guava:failureaccess</include>
 										<include>com.google.guava:listenablefuture</include>
 										<include>org.checkerframework:checker-qual</include>
-										<include>com.google.code.findbugs:jsr305</include>
 										<include>com.google.j2objc:j2objc-annotations</include>
-										<include>org.checkerframework:checker-compat-qual</include>
-										<include>org.codehaus.mojo:animal-sniffer-annotations</include>
 										<include>com.google.errorprone:error_prone_annotations</include>
 										<include>org.jspecify:jspecify</include>
 										<include>no.digipost:http-client-builder5</include>
 										<include>org.apache.httpcomponents.client5:httpclient5</include>
-										<include>commons-codec:commons-codec</include>
 										<include>org.apache.httpcomponents.core5:httpcore5</include>
-										<include>org.jboss.logging:jboss-logging</include>
-										<include>org.jboss.xnio:xnio-api</include>
 									</includes>
 									<searchTransitive>true</searchTransitive>
 									<message>Maven-avhengigheter har forandret seg. Sjekk at alle lisenser er OK før
